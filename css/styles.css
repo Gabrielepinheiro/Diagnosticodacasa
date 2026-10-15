@@ -1,5 +1,5 @@
 /* Identidade do escritório: Playfair Display (títulos), Poppins (texto),
-   League Spartan (rótulos), Homemade Apple (marca GP.). Paleta da Jornada do Cliente GP.
+   League Spartan (rótulos). Paleta da Jornada do Cliente GP.
    Fundo sempre branco: só os destaques têm cor de fundo; perguntas e cartões só têm a linha da borda. */
 :root {
   --bg: #FFFFFF; --surface: #FFFFFF; --line: #E3DDD2; --fg: #1D120E; --muted: #6B5A51;
@@ -8,7 +8,6 @@
   --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
   --f-body: "Poppins", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --f-label: "League Spartan", "Poppins", "Segoe UI", sans-serif;
-  --f-script: "Homemade Apple", "Brush Script MT", cursive;
   color-scheme: light;
 }
 
@@ -43,7 +42,7 @@ p { margin: 0 0 12px; }
   position: sticky; top: 0; z-index: 5; background: var(--bg);
   padding: calc(env(safe-area-inset-top, 0px) + 12px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
 }
-.marca { font-family: var(--f-script); color: var(--accent); font-size: 1.35rem; display: block; max-width: 640px; margin: 0 auto 8px; }
+.marca { font-family: var(--f-display); font-weight: 500; color: var(--fg); font-size: 1.35rem; letter-spacing: .02em; display: block; max-width: 640px; margin: 0 auto 8px; }
 .trilho { height: 2px; background: var(--line); max-width: 640px; margin: 0 auto; }
 .trilho span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s ease; }
 
