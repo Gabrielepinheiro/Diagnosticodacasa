@@ -1,7 +1,8 @@
 /* Identidade do escritório: Playfair Display (títulos), Poppins (texto),
-   League Spartan (rótulos), Homemade Apple (assinatura). Paleta da Jornada do Cliente GP. */
+   League Spartan (rótulos), Homemade Apple (marca GP.). Paleta da Jornada do Cliente GP.
+   Fundo sempre branco: só os destaques têm cor de fundo; perguntas e cartões só têm a linha da borda. */
 :root {
-  --bg: #F9F7F1; --surface: #FFFFFF; --line: #E3DDD2; --fg: #1D120E; --muted: #6B5A51;
+  --bg: #FFFFFF; --surface: #FFFFFF; --line: #E3DDD2; --fg: #1D120E; --muted: #6B5A51;
   --accent: #50543B; --accent-fg: #F9F7F1; --accent-soft: #E7E8DE; --taupe: #838867; --blue-soft: #E3EAF1;
   --warn: #490B0C; --warn-soft: #F3E6E4; --brown: #452D23;
   --f-display: "Playfair Display", Georgia, "Times New Roman", serif;
@@ -9,14 +10,6 @@
   --f-label: "League Spartan", "Poppins", "Segoe UI", sans-serif;
   --f-script: "Homemade Apple", "Brush Script MT", cursive;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1D120E; --surface: #281C17; --line: #3D2E27; --fg: #F9F7F1; --muted: #B9ABA1;
-    --accent: #AAB08F; --accent-fg: #1D120E; --accent-soft: #2F3125; --taupe: #A4BCD4; --blue-soft: #26313C;
-    --warn: #D99085; --warn-soft: #3B1B19; --brown: #E8E1D6;
-    color-scheme: dark;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -40,9 +33,9 @@ p { margin: 0 0 12px; }
 }
 .lede { font-size: 1.12rem; color: var(--muted); }
 .dica { color: var(--muted); font-size: .9rem; }
-.assinatura { font-family: var(--f-script); color: var(--accent); font-size: 1.3rem; margin-top: 28px; }
+.assinatura { font-family: var(--f-display); font-size: 1.25rem; color: var(--fg); margin-top: 28px; }
 .rodape { color: var(--muted); font-size: .85rem; margin-top: -6px; }
-.aviso { background: var(--blue-soft); padding: 10px 14px; border-radius: 4px; font-size: .9rem; margin-top: 18px; }
+.aviso { background: var(--accent-soft); padding: 10px 14px; border-radius: 4px; font-size: .9rem; margin-top: 18px; }
 .erro { color: var(--warn); font-size: .92rem; min-height: 1.4em; margin: 8px 0 0; font-weight: 400; }
 
 /* Topo */
@@ -92,7 +85,7 @@ legend { font-weight: 500; margin-bottom: 10px; padding: 0; }
   border: 1.5px solid var(--taupe); background: var(--surface);
 }
 .escolha.multi::before { border-radius: 3px; }
-.escolha[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+.escolha[aria-pressed=true] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 500; }
 .escolha[aria-pressed=true]::before { background: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 3px var(--surface); }
 .escolha:disabled { opacity: .45; cursor: not-allowed; }
 .escolha small { display: block; color: var(--muted); font-size: .82rem; }
@@ -117,7 +110,7 @@ legend { font-weight: 500; margin-bottom: 10px; padding: 0; }
 .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); }
 
 /* Resultado */
-.estado { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 4px; padding: 18px 20px; margin: 22px 0 8px; }
+.estado { background: var(--accent-soft); border: 0; border-left: 4px solid var(--accent); border-radius: 4px; padding: 18px 20px; margin: 22px 0 8px; }
 .estado-atencao { border-left-color: var(--taupe); }
 .estado-cuidado { border-left-color: var(--warn); }
 .estado-nome { font-family: var(--f-display); font-size: 1.7rem; font-style: italic; margin-bottom: 6px; }

@@ -53,7 +53,7 @@ function montarPorque(a, tempo) {
 }
 
 function listaNomes(ids) {
-  const nomes = ids.map((id) => minuscula(nomeAmbiente(id)));
+  const nomes = ids.map((id) => (id === 'keller' ? nomeAmbiente(id) : minuscula(nomeAmbiente(id)))); // Keller é substantivo alemão
   if (nomes.length <= 1) return nomes.join('');
   return nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
 }
@@ -104,6 +104,8 @@ function montarCaminho(estadoId, ambientes) {
  */
 export function calcular(r) {
   const marcados = new Set(r.ambientes);
+  // P10 aceita vários ambientes (antes era um só).
+  const evita = Array.isArray(r.evita) ? r.evita : r.evita ? [r.evita] : [];
   const atritos = r.atritos.filter((x) => x.amb);
   const faltas = r.faltas.filter((x) => x.amb);
 
@@ -126,7 +128,7 @@ export function calcular(r) {
       estado,
       atritos: atritos.filter((x) => x.amb === id).map((x) => textoEscolha(ATRITOS, x)),
       faltas: faltas.filter((x) => x.amb === id).map((x) => textoEscolha(FALTAS, x)),
-      evita: r.evita === id,
+      evita: evita.includes(id),
       prioridade: r.prioridade === id,
     };
     a.pontos = {

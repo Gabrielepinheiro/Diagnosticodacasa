@@ -6,7 +6,7 @@ import { calcular, textoResultado } from '../js/diagnostico.js';
 const base = (extra = {}) => ({
   nome: 'Ana', email: 'ana@exemplo.de', instagram: '', moradores: ['parceiro'],
   ambientes: [], porAmbiente: {}, atritos: [], faltas: [{ id: 'nada', amb: '' }],
-  evita: 'nenhum', prioridade: '', tempo: '2a5', origem: 'instagram', indicacao: '', consentimento: true,
+  evita: ['nenhum'], prioridade: '', tempo: '2a5', origem: 'instagram', indicacao: '', consentimento: true,
   ...extra,
 });
 
@@ -15,7 +15,7 @@ test('pontos de impacto somam como no documento', () => {
     ambientes: ['estar'],
     porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' } },
     atritos: [{ id: 'descansar_juntos', amb: 'estar' }],
-    evita: 'estar', prioridade: 'estar',
+    evita: ['estar'], prioridade: 'estar',
   }));
   const a = res.ambientes[0];
   assert.deepEqual(a.pontos, { pazFrequencia: 6, atritos: 2, faltas: 0, evita: 1, prioridade: 2 });
@@ -118,4 +118,20 @@ test('texto do resultado segue o formato do documento', () => {
   assert.match(t, /^O DIAGNÓSTICO DA SUA CASA\nPreparado para Ana Souza/);
   assert.match(t, /1\. Sala de estar {2}· {2}Comece por aqui/);
   assert.match(t, /O SEU PRÓXIMO PASSO/);
+});
+
+test('P10 com vários ambientes dá +1 para cada um', () => {
+  const res = calcular(base({
+    ambientes: ['estar', 'keller'],
+    porAmbiente: { estar: { paz: 1, freq: 3, estado: 'moveis' }, keller: { paz: 2, freq: 1, estado: 'vazio' } },
+    evita: ['estar', 'keller'], prioridade: 'estar',
+  }));
+  assert.equal(res.ambientes.find((a) => a.id === 'estar').pontos.evita, 1);
+  assert.equal(res.ambientes.find((a) => a.id === 'keller').pontos.evita, 1);
+});
+
+test('"Gosto de como ele está" conta como esforço leve', () => {
+  const res = calcular(base({ ambientes: ['servico'], porAmbiente: { servico: { paz: 0, freq: 2, estado: 'gosto' } }, prioridade: 'servico' }));
+  assert.equal(res.ambientes[0].esforcoLeve, true);
+  assert.equal(res.ambientes[0].quadrante, 3);
 });

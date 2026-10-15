@@ -20,7 +20,7 @@ function novoRascunho() {
       nome: '', email: '', instagram: '', moradores: [],
       ambientes: [], porAmbiente: {},
       atritos: [], faltas: [],
-      evita: '', prioridade: '',
+      evita: [], prioridade: '',
       tempo: '', origem: '', indicacao: '', consentimento: false,
     },
     resultado: null,
@@ -33,7 +33,10 @@ let enviando = false;
 function carregar() {
   try {
     const s = JSON.parse(localStorage.getItem(RASCUNHO));
-    if (s?.r && s.passo) return s;
+    if (s?.r && s.passo) {
+      if (!Array.isArray(s.r.evita)) s.r.evita = s.r.evita ? [s.r.evita] : [];
+      return s;
+    }
   } catch { /* rascunho inválido */ }
   return novoRascunho();
 }
@@ -190,12 +193,13 @@ const TELAS = {
       return `
       <p class="eyebrow">5 · Como você se sente</p>
       <h2 tabindex="-1">Duas perguntas rápidas</h2>
-      <fieldset><legend>Qual ambiente você evita mostrar quando recebe visitas?</legend>
-        ${escolhas('evita', [...meus, { id: 'nenhum', t: 'Nenhum' }], st.r.evita)}</fieldset>
+      <fieldset><legend>Quais ambientes você evita mostrar quando recebe visitas?</legend>
+        <p class="dica">Pode marcar mais de um.</p>
+        ${escolhas('evita', [...meus, { id: 'nenhum', t: 'Nenhum' }], st.r.evita, { multi: true })}</fieldset>
       <fieldset><legend>Se só um ambiente pudesse ficar pronto este mês, qual seria?</legend>
         ${escolhas('prioridade', meus, st.r.prioridade)}</fieldset>`;
     },
-    valido: () => st.r.evita && st.r.prioridade,
+    valido: () => st.r.evita.length && st.r.prioridade,
   },
   momento: {
     html: () => `
@@ -319,8 +323,12 @@ function escolher(grupo, v) {
     const ordem = P.AMBIENTES.map((a) => a.id);
     r.ambientes.sort((x, y) => ordem.indexOf(x) - ordem.indexOf(y));
     // Respostas que apontavam para um ambiente desmarcado precisam ser escolhidas de novo.
-    if (r.evita !== 'nenhum' && !r.ambientes.includes(r.evita)) r.evita = '';
+    r.evita = r.evita.filter((id) => id === 'nenhum' || r.ambientes.includes(id));
     if (!r.ambientes.includes(r.prioridade)) r.prioridade = '';
+  } else if (grupo === 'evita') {
+    // "Nenhum" não combina com os outros.
+    if (v === 'nenhum') r.evita = r.evita.includes('nenhum') ? [] : ['nenhum'];
+    else { r.evita = r.evita.filter((id) => id !== 'nenhum'); alternar(r.evita, v); }
   } else if (grupo === 'atritos' || grupo === 'faltas') {
     const lista = grupo === 'atritos' ? P.ATRITOS : P.FALTAS;
     const opcao = lista.find((o) => o.id === v);

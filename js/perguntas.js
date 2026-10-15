@@ -12,6 +12,8 @@ export const AMBIENTES = [
   { id: 'office', nome: 'Home office' },
   { id: 'banheiro', nome: 'Banheiro' },
   { id: 'lavanderia', nome: 'Lavanderia' },
+  { id: 'servico', nome: 'Área de serviço' },
+  { id: 'keller', nome: 'Keller', obs: 'porão ou depósito' },
   { id: 'varanda', nome: 'Varanda ou terraço' },
 ];
 
@@ -38,6 +40,7 @@ export const FREQ = [
 ];
 
 export const ESTADO = [
+  { id: 'gosto', t: 'Gosto de como ele está', leve: true },
   { id: 'moveis', t: 'Tem os móveis, falta deixar com a nossa cara', leve: true },
   { id: 'provisorio', t: 'Tem móveis provisórios ou que não combinam', leve: false },
   { id: 'vazio', t: 'Está vazio ou quase vazio', leve: false },
@@ -48,7 +51,7 @@ export const ATRITOS = [
   { id: 'guarda_roupa', t: 'O guarda-roupa não tem mais espaço', amb: 'casal' },
   { id: 'chegada', t: 'Não tenho onde deixar casacos, sapatos, chaves e bolsas ao chegar', amb: 'hall' },
   { id: 'trabalho', t: 'Trabalho na mesa de jantar, no sofá ou na cama', amb: 'office' },
-  { id: 'roupa', t: 'A roupa secando fica espalhada pela casa', amb: 'lavanderia' },
+  { id: 'roupa', t: 'A roupa secando fica espalhada pela casa', amb: ['lavanderia', 'servico'] },
   { id: 'brinquedos', t: 'Os brinquedos se espalham pela casa inteira', amb: 'infantil' },
   { id: 'receber', t: 'Não consigo receber pessoas à mesa com conforto', amb: 'jantar' },
   { id: 'descansar_juntos', t: 'Não temos um lugar gostoso para descansar juntos', amb: 'estar' },
@@ -62,7 +65,7 @@ export const ATRITOS = [
 export const FALTAS = [
   { id: 'trabalhar', t: 'Um lugar para trabalhar ou estudar', amb: 'office' },
   { id: 'receber', t: 'Um lugar para receber família e amigos', amb: 'jantar' },
-  { id: 'guardar', t: 'Um lugar para guardar malas, bicicleta, coisas de estação', amb: ['hall', 'lavanderia'] },
+  { id: 'guardar', t: 'Um lugar para guardar malas, bicicleta, coisas de estação', amb: ['hall', 'lavanderia', 'servico', 'keller'] },
   { id: 'cantinho', t: 'Um cantinho só meu, para ler ou descansar', amb: 'estar' },
   { id: 'brincar', t: 'Um lugar para as crianças brincarem', amb: 'infantil' },
   { id: 'hospedar', t: 'Um lugar para hospedar quem vem do Brasil', amb: null },
@@ -74,6 +77,7 @@ export const TEMPO = [
   { id: 'menos2', t: 'Menos de 2 anos' },
   { id: '2a5', t: 'De 2 a 5 anos' },
   { id: 'mais5', t: 'Mais de 5 anos, ou é o nosso lar' },
+  { id: 'indeterminado', t: 'Tempo indeterminado' },
 ];
 
 export const ORIGEM = [

@@ -158,6 +158,11 @@ function htmlLista() {
     </div>`;
 }
 
+function evitaTxt(evita) {
+  const ids = (Array.isArray(evita) ? evita : [evita]).filter((id) => id && id !== 'nenhum');
+  return ids.length ? ids.map(P.nomeAmbiente).join(', ') : 'Nenhum';
+}
+
 function rotulo(lista, id) { return lista.find((o) => (o.v ?? o.id) === id)?.t ?? id; }
 
 function htmlDetalhe(d) {
@@ -217,7 +222,7 @@ function htmlDetalhe(d) {
         }).join('')}
         <dt>Atritos da rotina (P8)</dt><dd>${h(r.atritos.map((x) => escolhaTxt(P.ATRITOS, x)).join(' · ') || 'Nenhum')}</dd>
         <dt>O que falta (P9)</dt><dd>${h(r.faltas.map((x) => escolhaTxt(P.FALTAS, x)).join(' · '))}</dd>
-        <dt>Evita mostrar (P10)</dt><dd>${h(r.evita === 'nenhum' ? 'Nenhum' : P.nomeAmbiente(r.evita))}</dd>
+        <dt>Evita mostrar (P10)</dt><dd>${h(evitaTxt(r.evita))}</dd>
         <dt>Pronto este mês (P11)</dt><dd>${h(P.nomeAmbiente(r.prioridade))}</dd>
         <dt>Tempo no imóvel</dt><dd>${h(rotulo(P.TEMPO, r.tempo))}</dd>
         <dt>Como conheceu</dt><dd>${h(rotulo(P.ORIGEM, r.origem))}${r.indicacao ? ` · indicação de ${h(r.indicacao)}` : ''}</dd>
@@ -301,7 +306,7 @@ function markdownNotion(d) {
     '**O que falta (P9)**',
     ...r.faltas.map((x) => `- ${x.texto || rotulo(P.FALTAS, x.id)}${x.amb ? ' → ' + P.nomeAmbiente(x.amb) : ''}`),
     '',
-    `**Evita mostrar:** ${r.evita === 'nenhum' ? 'Nenhum' : P.nomeAmbiente(r.evita)} · **Pronto este mês:** ${P.nomeAmbiente(r.prioridade)}`,
+    `**Evita mostrar:** ${evitaTxt(r.evita)} · **Pronto este mês:** ${P.nomeAmbiente(r.prioridade)}`,
     `**Tempo no imóvel:** ${rotulo(P.TEMPO, r.tempo)} · **Quem mora:** ${r.moradores.map((m) => rotulo(P.MORADORES, m)).join(', ')}`,
     `**Como conheceu:** ${rotulo(P.ORIGEM, r.origem)}${r.indicacao ? ' (' + r.indicacao + ')' : ''}`,
   ];
