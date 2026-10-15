@@ -38,6 +38,8 @@ function carregar() {
     if (s?.r && s.passo) {
       if (!Array.isArray(s.r.evita)) s.r.evita = s.r.evita ? [s.r.evita] : [];
       s.r = { ...novoRascunho().r, ...s.r }; // rascunhos de versões anteriores
+      // Resultado salvo por uma versão anterior do app: refaz com as regras de agora.
+      if (s.resultado) s.resultado = calcular(s.r);
       return s;
     }
   } catch { /* rascunho inválido */ }
@@ -306,8 +308,23 @@ function htmlResultado() {
 
 // ---------- Desenho ----------
 
+// Se algo salvo no celular não combinar com esta versão, recomeça em vez de deixar a tela em branco.
 function render() {
+  try {
+    desenharTela();
+  } catch (e) {
+    console.error(e);
+    const codigo = st.codigo;
+    st = novoRascunho();
+    st.codigo = codigo;
+    salvar();
+    desenharTela();
+  }
+}
+
+function desenharTela() {
   const lista = passos();
+  if (st.passo === 'resultado' && !st.resultado) st.passo = 'momento';
   if (!lista.includes(st.passo)) st.passo = 'casa';
   const [tipo, arg] = st.passo.split(':');
   const tela = TELAS[tipo];
