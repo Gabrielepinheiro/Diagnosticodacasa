@@ -155,6 +155,7 @@ function htmlLista() {
             <span class="meta">${d.instagram ? '@' + h(d.instagram) + ' · ' : ''}${h(dataHora(d.criado_em))}</span><br>
             <span class="meta">${h(d.estado)} · Caminho: ${h(d.caminho)} · Nº 1: ${h(d.resultado?.ambientes?.[0]?.nome)}</span></span>
           <span class="dir"><span class="pilula ${d.status === 'novo' ? 'novo' : ''}">${h(STATUS[d.status])}</span>
+            ${d.respostas?.proposta === 'sim' ? '<span class="pilula novo">Quer proposta</span>' : ''}
             ${d.respostas?.inicio === 'mes' ? '<span class="pilula ok">Quer começar este mês</span>' : ''}</span>
         </button>`).join('') : '<p class="vazio">Nenhum diagnóstico aqui ainda.</p>'}
     </div>`;
@@ -221,6 +222,7 @@ function htmlDetalhe(d) {
     <section class="cartao">
       <p class="eyebrow">Respostas</p>
       <dl class="resp">
+        <dt>Quer proposta</dt><dd>${h(rotulo(P.PROPOSTA, r.proposta))}</dd>
         <dt>Quem mora</dt><dd>${h(r.moradores.map((m) => rotulo(P.MORADORES, m)).join(', '))}</dd>
         ${r.ambientes.map((id) => {
           const a = r.porAmbiente[id];
@@ -282,6 +284,7 @@ function htmlPublico() {
       ${blocoPublico('Onde salva referências', P.REFERENCIAS, rs.map((r) => r.referencias))}
       ${blocoPublico('Ambiente nº 1 do diagnóstico', P.AMBIENTES.map((a) => ({ id: a.id, t: a.nome })), primeiros)}
       ${blocoPublico('Caminho indicado', ['Premier', 'Essence', 'Maison', 'Personalité', 'Collection ou Essence'].map((t) => ({ id: t, t })), res.map((x) => x.caminho?.linha))}
+      ${blocoPublico('Quer receber proposta', P.PROPOSTA, rs.map((r) => r.proposta))}
       ${blocoPublico('Quando quer começar', P.INICIO, rs.map((r) => r.inicio))}
       ${blocoPublico('Imóvel', P.IMOVEL, rs.map((r) => r.imovel))}
       ${blocoPublico('Mudar paredes', P.PINTURA, rs.map((r) => r.pintura))}
@@ -370,6 +373,7 @@ function markdownNotion(d) {
     `**Evita mostrar:** ${evitaTxt(r.evita)} · **Pronto este mês:** ${P.nomeAmbiente(r.prioridade)}`,
     `**Tempo no imóvel:** ${rotulo(P.TEMPO, r.tempo)} · **Quem mora:** ${r.moradores.map((m) => rotulo(P.MORADORES, m)).join(', ')}`,
     `**Como conheceu:** ${rotulo(P.ORIGEM, r.origem)}${r.indicacao ? ' (' + r.indicacao + ')' : ''}`,
+    `**Quer proposta:** ${rotulo(P.PROPOSTA, r.proposta)}`,
     `**Imóvel:** ${rotulo(P.IMOVEL, r.imovel)} · **Mudar paredes:** ${rotulo(P.PINTURA, r.pintura)} · **Quando começar:** ${rotulo(P.INICIO, r.inicio)}`,
     '',
     `**Acompanha decoração:** ${rotulo(P.ACOMPANHA, r.acompanha)}`,

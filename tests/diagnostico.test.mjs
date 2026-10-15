@@ -89,7 +89,7 @@ test('menos de 2 anos muda a direção do quadrante 2', () => {
   assert.doesNotMatch(calcular(base({ ...r, tempo: 'mais5' })).ambientes[0].direcao, /mudança/);
 });
 
-test('ambiente que falta (P9) e não existe entra na lista como esforço maior', () => {
+test('atrito ou falta de um ambiente não assinalado não cria ambiente novo', () => {
   const res = calcular(base({
     ambientes: ['estar'],
     porAmbiente: { estar: { paz: 0, freq: 3, estado: 'moveis' } },
@@ -97,11 +97,16 @@ test('ambiente que falta (P9) e não existe entra na lista como esforço maior',
     faltas: [{ id: 'trabalhar', amb: 'office' }],
     prioridade: 'estar',
   }));
-  const office = res.ambientes.find((a) => a.id === 'office');
-  assert.equal(office.existe, false);
-  assert.equal(office.impacto, 4);
-  assert.equal(office.esforcoLeve, false);
-  assert.match(office.porque, /ainda não existe/);
+  assert.deepEqual(res.ambientes.map((a) => a.id), ['estar']);
+});
+
+test('próximo passo: serviço e ambientes em negrito e frase da proposta conforme a escolha', () => {
+  const r = { ambientes: ['estar', 'casal'], porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' }, casal: { paz: 2, freq: 3, estado: 'moveis' } }, prioridade: 'estar' };
+  const sim = calcular(base({ ...r, proposta: 'sim' })).caminho.frase;
+  assert.match(sim, /^Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é o \*\*Essence\*\* para \*\*sala de estar\*\* e \*\*quarto de casal\*\*\./);
+  assert.match(sim, /receberá no e-mail cadastrado uma proposta personalizada/);
+  assert.doesNotMatch(calcular(base({ ...r, proposta: 'nao' })).caminho.frase, /proposta/);
+  assert.doesNotMatch(textoResultado('Ana', calcular(base({ ...r, proposta: 'sim' }))), /\*\*/);
 });
 
 test('"Outra" usa o texto da pessoa no por quê', () => {
@@ -152,7 +157,7 @@ test('saúde: 100 sem impacto, 50 no impacto alto, 0 a partir de 12; média pesa
 
 test('convite usa o nome e o artigo do ambiente nº 1', () => {
   const res = calcular(base({ ambientes: ['servico'], porAmbiente: { servico: { paz: 3, freq: 3, estado: 'vazio' } } }));
-  assert.equal(res.convite.abertura, 'Ana, com base no seu diagnóstico, eu sugiro que você comece pela área de serviço.');
+  assert.equal(res.convite.abertura, 'Ana, pelo que você me contou, eu sugiro que você comece pela área de serviço.');
   const k = calcular(base({ ambientes: ['keller'], porAmbiente: { keller: { paz: 3, freq: 3, estado: 'vazio' } } }));
   assert.match(k.convite.abertura, /comece pelo Keller\.$/);
 });

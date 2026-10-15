@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import * as P from './perguntas.js';
-import { calcular, faixaSaude } from './diagnostico.js';
+import { calcular, faixaSaude, negrito } from './diagnostico.js';
 import { verificarSenha, enviarDiagnostico, normalizarSenha, modoDemo } from './api.js';
 
 const RASCUNHO = 'gp-diagnostico-rascunho';
@@ -17,7 +17,7 @@ function novoRascunho() {
     passo: 'senha',
     codigo: '',
     r: {
-      nome: '', email: '', instagram: '', moradores: [],
+      nome: '', email: '', instagram: '', moradores: [], proposta: '',
       ambientes: [], porAmbiente: {},
       atritos: [], faltas: [],
       evita: [], prioridade: '',
@@ -68,34 +68,42 @@ function escolhas(grupo, opcoes, ativo, { multi = false, desativados = [] } = {}
   }).join('')}</div>`;
 }
 
-function seletorAmbiente(grupo, idx, valor, candidatos) {
-  const meus = st.r.ambientes;
-  const lista = candidatos ?? [...meus, ...P.AMBIENTES.map((a) => a.id).filter((id) => !meus.includes(id))];
+function seletorAmbiente(grupo, idx, valor, lista) {
   return `<label class="sub">Em qual ambiente?
     <select data-amb="${grupo}" data-i="${idx}">
       <option value="">Escolha</option>
-      ${lista.map((id) => `<option value="${id}"${valor === id ? ' selected' : ''}>${h(P.nomeAmbiente(id))}${meus.includes(id) ? '' : ' (não tenho)'}</option>`).join('')}
+      ${lista.map((id) => `<option value="${id}"${valor === id ? ' selected' : ''}>${h(P.nomeAmbiente(id))}</option>`).join('')}
     </select></label>`;
 }
 
-// Candidatos de uma opção cujo ambiente a pessoa precisa escolher; null = vale o ambiente fixo.
+// Ambientes que se substituem quando um deles não foi assinalado (ex.: estar e jantar integradas).
+const EQUIVALENTES = { estar: ['jantar'], jantar: ['estar'], lavanderia: ['servico'], servico: ['lavanderia'] };
+
+// Só entram ambientes que a pessoa assinalou. Se o ambiente sugerido pela opção não existe na
+// casa, vale um equivalente; se nenhum existir, a pessoa escolhe entre os que assinalou.
+function ambientesPossiveis(opcao) {
+  const meus = st.r.ambientes;
+  if (opcao.nenhum) return [];
+  if (typeof opcao.amb === 'string') {
+    if (meus.includes(opcao.amb)) return [opcao.amb];
+    const eq = (EQUIVALENTES[opcao.amb] || []).filter((id) => meus.includes(id));
+    return eq.length ? eq : meus;
+  }
+  if (Array.isArray(opcao.amb)) {
+    const sugeridos = opcao.amb.filter((id) => meus.includes(id));
+    return sugeridos.length ? sugeridos : meus;
+  }
+  return meus;
+}
+// Lista para escolher; null quando só há um ambiente possível (ele é aplicado direto).
 function candidatos(opcao) {
   if (opcao.nenhum) return null;
-  if (typeof opcao.amb === 'string') return null;
-  if (Array.isArray(opcao.amb)) {
-    const meus = opcao.amb.filter((id) => st.r.ambientes.includes(id));
-    if (meus.length === 1) return null;
-    return meus.length ? meus : opcao.amb;
-  }
-  return undefined; // qualquer ambiente
+  const l = ambientesPossiveis(opcao);
+  return l.length === 1 ? null : l;
 }
 function ambienteFixo(opcao) {
-  if (typeof opcao.amb === 'string') return opcao.amb;
-  if (Array.isArray(opcao.amb)) {
-    const meus = opcao.amb.filter((id) => st.r.ambientes.includes(id));
-    if (meus.length === 1) return meus[0];
-  }
-  return '';
+  const l = ambientesPossiveis(opcao);
+  return l.length === 1 ? l[0] : '';
 }
 
 function blocoEscolhaAmbiente(chave, lista) {
@@ -140,6 +148,7 @@ const TELAS = {
       <h1 tabindex="-1">Toda casa tem um ambiente que tira a nossa paz.</h1>
       <p class="lede">Às vezes sabemos qual é; às vezes só sentimos que algo não está bem.</p>
       <p>Em cerca de 6 minutos, você me conta como se sente na sua casa hoje. No fim, recebe os seus ambientes em ordem de prioridade e uma direção de por onde começar.</p>
+      <p>Se tiver interesse em continuar essa jornada comigo, você também pode pedir uma proposta personalizada. Se não tiver, não tem problema: o seu diagnóstico chega do mesmo jeito.</p>
       <p class="assinatura">Gabriele Pinheiro</p>`,
     botao: 'Começar',
     valido: () => true,
@@ -152,8 +161,11 @@ const TELAS = {
       <label class="campo">E-mail <small>para receber o diagnóstico</small><input type="email" data-campo="email" value="${h(st.r.email)}" autocomplete="email" inputmode="email" maxlength="160"></label>
       <label class="campo">Seu @ no Instagram <small>opcional</small><input type="text" data-campo="instagram" value="${h(st.r.instagram)}" autocapitalize="none" spellcheck="false" maxlength="60" placeholder="@"></label>
       <fieldset><legend>Quem mora na casa com você?</legend>
-      ${escolhas('moradores', P.MORADORES, st.r.moradores, { multi: true })}</fieldset>`,
-    valido: () => st.r.nome.trim() && emailValido(st.r.email) && st.r.moradores.length,
+      ${escolhas('moradores', P.MORADORES, st.r.moradores, { multi: true })}</fieldset>
+      <fieldset><legend>Você gostaria de receber também uma proposta personalizada?</legend>
+        <p class="dica">No fim do questionário, você recebe o seu diagnóstico. Se tiver interesse em continuar essa jornada comigo, posso enviar ao seu e-mail uma proposta personalizada, com um plano de execução para a sua casa. Se não tiver interesse, não tem problema: você recebe o seu diagnóstico do mesmo jeito.</p>
+        ${escolhas('proposta', P.PROPOSTA, st.r.proposta)}</fieldset>`,
+    valido: () => st.r.nome.trim() && emailValido(st.r.email) && st.r.moradores.length && st.r.proposta,
   },
   casa: {
     html: () => `
@@ -247,7 +259,7 @@ function listaCompleta(chave, lista) {
     const o = lista.find((y) => y.id === x.id);
     if (o.nenhum) return true;
     if (o.outra && !x.texto?.trim()) return false;
-    return !!x.amb;
+    return st.r.ambientes.includes(x.amb);
   });
 }
 
@@ -296,7 +308,7 @@ function htmlResultado() {
       <p>${h(res.convite.texto)}</p>
       <p>${h(res.convite.fecho)}</p>
       <p class="eyebrow passo-titulo">O seu próximo passo</p>
-      <p>${h(res.caminho.frase)}</p>
+      <p>${negrito(h(res.caminho.frase))}</p>
       <p class="assinatura">Gabriele Pinheiro</p>
       <p class="rodape">Design de interiores online</p>
     </section>
@@ -389,6 +401,11 @@ function escolher(grupo, v) {
     r.ambientes.sort((x, y) => ordem.indexOf(x) - ordem.indexOf(y));
     // Respostas que apontavam para um ambiente desmarcado precisam ser escolhidas de novo.
     r.evita = r.evita.filter((id) => id === 'nenhum' || r.ambientes.includes(id));
+    // Atritos e faltas que apontavam para um ambiente desmarcado são refeitos com os ambientes de agora.
+    [['atritos', P.ATRITOS], ['faltas', P.FALTAS]].forEach(([chave, lista]) => r[chave].forEach((x) => {
+      const o = lista.find((y) => y.id === x.id);
+      if (!o.nenhum && !r.ambientes.includes(x.amb)) x.amb = ambienteFixo(o);
+    }));
     if (!r.ambientes.includes(r.prioridade)) r.prioridade = '';
   } else if (grupo === 'evita') {
     // "Nenhum" não combina com os outros.

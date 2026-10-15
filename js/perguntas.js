@@ -135,4 +135,9 @@ export const TRAVAS = [
   { id: 'comecar', t: 'Não sei por onde começar' },
 ];
 
+export const PROPOSTA = [
+  { id: 'sim', t: 'Sim, quero receber a proposta no meu e-mail' },
+  { id: 'nao', t: 'Não, por enquanto quero só o diagnóstico' },
+];
+
 export const MAX_ESCOLHAS = 3;
