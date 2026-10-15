@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Painel do Diagnóstico · GP.</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F9F7F1">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=League+Spartan:wght@500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+<header class="topo-admin">
+  <span class="marca">GP.</span>
+  <nav id="abas" class="abas" hidden>
+    <button type="button" data-aba="diagnosticos" aria-pressed="true">Diagnósticos</button>
+    <button type="button" data-aba="senhas" aria-pressed="false">Senhas</button>
+  </nav>
+  <button type="button" id="sair" class="voltar" hidden>Sair</button>
+</header>
+<main id="painel" class="pagina larga"></main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
