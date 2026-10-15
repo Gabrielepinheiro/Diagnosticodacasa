@@ -237,7 +237,6 @@ function htmlDetalhe(d) {
         <dt>Acompanha decoração</dt><dd>${h(rotulo(P.ACOMPANHA, r.acompanha))}</dd>
         <dt>Referências</dt><dd>${h(lista(P.REFERENCIAS, r.referencias))}</dd>
         <dt>O que trava</dt><dd>${h(lista(P.TRAVAS, r.travas))}</dd>
-        <dt>Quer ver no Instagram</dt><dd>${h(lista(P.CONTEUDO, r.conteudo))}</dd>
         <dt>Como conheceu</dt><dd>${h(rotulo(P.ORIGEM, r.origem))}${r.indicacao ? ` · indicação de ${h(r.indicacao)}` : ''}</dd>
       </dl>
     </section>`;
@@ -279,7 +278,6 @@ function htmlPublico() {
     <p class="dica">Porcentagem sobre quem respondeu cada pergunta. Nas perguntas de várias opções, a soma passa de 100%.</p>
     <div class="grade2">
       ${blocoPublico('O que mais trava na hora de decorar', P.TRAVAS, rs.map((r) => r.travas), 'Bom ponto de partida para conteúdo e para a sua comunicação.')}
-      ${blocoPublico('O que querem ver no Instagram', P.CONTEUDO, rs.map((r) => r.conteudo))}
       ${blocoPublico('Acompanha perfis de decoração', P.ACOMPANHA, rs.map((r) => r.acompanha))}
       ${blocoPublico('Onde salva referências', P.REFERENCIAS, rs.map((r) => r.referencias))}
       ${blocoPublico('Ambiente nº 1 do diagnóstico', P.AMBIENTES.map((a) => ({ id: a.id, t: a.nome })), primeiros)}
@@ -377,7 +375,6 @@ function markdownNotion(d) {
     `**Acompanha decoração:** ${rotulo(P.ACOMPANHA, r.acompanha)}`,
     `**Referências:** ${lista(P.REFERENCIAS, r.referencias)}`,
     `**O que trava:** ${lista(P.TRAVAS, r.travas)}`,
-    `**Quer ver no Instagram:** ${lista(P.CONTEUDO, r.conteudo)}`,
   ];
   return linhas.join('\n');
 }

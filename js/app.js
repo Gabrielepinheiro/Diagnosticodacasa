@@ -22,7 +22,7 @@ function novoRascunho() {
       atritos: [], faltas: [],
       evita: [], prioridade: '',
       imovel: '', tempo: '', pintura: '', inicio: '',
-      acompanha: '', referencias: [], travas: [], conteudo: [],
+      acompanha: '', referencias: [], travas: [],
       origem: '', indicacao: '', consentimento: false,
     },
     resultado: null,
@@ -222,9 +222,7 @@ const TELAS = {
       <fieldset><legend>Você costuma salvar referências?</legend>
         <p class="dica">Pode marcar mais de uma.</p>${escolhas('referencias', P.REFERENCIAS, st.r.referencias, { multi: true })}</fieldset>
       <fieldset><legend>Quando você vai decorar ou comprar um móvel, o que mais te trava?</legend>
-        <p class="dica">Pode marcar mais de uma.</p>${escolhas('travas', P.TRAVAS, st.r.travas, { multi: true })}</fieldset>
-      <fieldset><legend>O que você mais gostaria de ver no meu Instagram?</legend>
-        <p class="dica">Opcional. Pode marcar mais de uma.</p>${escolhas('conteudo', P.CONTEUDO, st.r.conteudo, { multi: true })}</fieldset>`,
+        <p class="dica">Pode marcar mais de uma.</p>${escolhas('travas', P.TRAVAS, st.r.travas, { multi: true })}</fieldset>`,
     valido: () => st.r.acompanha && st.r.referencias.length && st.r.travas.length,
   },
   momento: {
@@ -362,7 +360,7 @@ function escolher(grupo, v) {
   if (tipo === 'amb') {
     const a = (r.porAmbiente[ambId] ||= {});
     a[grupo] = grupo === 'estado' ? v : Number(v);
-  } else if (['moradores', 'travas', 'conteudo'].includes(grupo)) {
+  } else if (['moradores', 'travas'].includes(grupo)) {
     alternar(r[grupo], v);
   } else if (grupo === 'referencias') {
     // "Não costumo salvar" não combina com os outros.

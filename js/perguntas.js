@@ -135,13 +135,4 @@ export const TRAVAS = [
   { id: 'comecar', t: 'Não sei por onde começar' },
 ];
 
-export const CONTEUDO = [
-  { id: 'antes_depois', t: 'Antes e depois de projetos' },
-  { id: 'medidas', t: 'Dicas de medidas e de layout' },
-  { id: 'onde_comprar', t: 'Onde comprar e achados' },
-  { id: 'cores', t: 'Combinação de cores e materiais' },
-  { id: 'alugado', t: 'Como decorar um imóvel alugado' },
-  { id: 'bastidores', t: 'Bastidores dos projetos' },
-];
-
 export const MAX_ESCOLHAS = 3;
