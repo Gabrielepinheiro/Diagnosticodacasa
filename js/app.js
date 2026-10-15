@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import * as P from './perguntas.js';
-import { calcular } from './diagnostico.js';
+import { calcular, faixaSaude } from './diagnostico.js';
 import { verificarSenha, enviarDiagnostico, normalizarSenha, modoDemo } from './api.js';
 
 const RASCUNHO = 'gp-diagnostico-rascunho';
@@ -21,7 +21,9 @@ function novoRascunho() {
       ambientes: [], porAmbiente: {},
       atritos: [], faltas: [],
       evita: [], prioridade: '',
-      tempo: '', origem: '', indicacao: '', consentimento: false,
+      imovel: '', tempo: '', pintura: '', inicio: '',
+      acompanha: '', referencias: [], travas: [], conteudo: [],
+      origem: '', indicacao: '', consentimento: false,
     },
     resultado: null,
   };
@@ -35,6 +37,7 @@ function carregar() {
     const s = JSON.parse(localStorage.getItem(RASCUNHO));
     if (s?.r && s.passo) {
       if (!Array.isArray(s.r.evita)) s.r.evita = s.r.evita ? [s.r.evita] : [];
+      s.r = { ...novoRascunho().r, ...s.r }; // rascunhos de versões anteriores
       return s;
     }
   } catch { /* rascunho inválido */ }
@@ -47,7 +50,7 @@ function salvar() {
 // ---------- Passos ----------
 
 function passos() {
-  return ['senha', 'abertura', 'voce', 'casa', ...st.r.ambientes.map((id) => 'amb:' + id), 'atritos', 'faltas', 'sente', 'momento', 'resultado'];
+  return ['senha', 'abertura', 'voce', 'casa', ...st.r.ambientes.map((id) => 'amb:' + id), 'atritos', 'faltas', 'sente', 'planos', 'decoracao', 'momento', 'resultado'];
 }
 
 const linkInstagram = () => (CONFIG.instagram ? `https://ig.me/m/${encodeURIComponent(CONFIG.instagram)}` : '');
@@ -134,7 +137,7 @@ const TELAS = {
       <p class="eyebrow">Diagnóstico da Casa</p>
       <h1 tabindex="-1">Toda casa tem um ambiente que tira a nossa paz.</h1>
       <p class="lede">Às vezes sabemos qual é; às vezes só sentimos que algo não está bem.</p>
-      <p>Em cerca de 5 minutos, você me conta como se sente na sua casa hoje. No fim, recebe os seus ambientes em ordem de prioridade e uma direção de por onde começar.</p>
+      <p>Em cerca de 6 minutos, você me conta como se sente na sua casa hoje. No fim, recebe os seus ambientes em ordem de prioridade e uma direção de por onde começar.</p>
       <p class="assinatura">Gabriele Pinheiro</p>`,
     botao: 'Começar',
     valido: () => true,
@@ -201,18 +204,40 @@ const TELAS = {
     },
     valido: () => st.r.evita.length && st.r.prioridade,
   },
+  planos: {
+    html: () => `
+      <p class="eyebrow">6 · Os seus planos</p>
+      <h2 tabindex="-1">O momento da casa</h2>
+      <fieldset><legend>O imóvel é próprio ou alugado?</legend>${escolhas('imovel', P.IMOVEL, st.r.imovel)}</fieldset>
+      <fieldset><legend>Por quanto tempo você pretende ficar neste imóvel?</legend>${escolhas('tempo', P.TEMPO, st.r.tempo)}</fieldset>
+      <fieldset><legend>Você tem vontade de pintar paredes ou colocar papel de parede?</legend>${escolhas('pintura', P.PINTURA, st.r.pintura)}</fieldset>
+      <fieldset><legend>Quando você gostaria de começar?</legend>${escolhas('inicio', P.INICIO, st.r.inicio)}</fieldset>`,
+    valido: () => st.r.imovel && st.r.tempo && st.r.pintura && st.r.inicio,
+  },
+  decoracao: {
+    html: () => `
+      <p class="eyebrow">7 · Você e a decoração</p>
+      <h2 tabindex="-1">Agora, um pouco sobre você e a decoração</h2>
+      <fieldset><legend>O quanto você acompanha perfis de decoração?</legend>${escolhas('acompanha', P.ACOMPANHA, st.r.acompanha)}</fieldset>
+      <fieldset><legend>Você costuma salvar referências?</legend>
+        <p class="dica">Pode marcar mais de uma.</p>${escolhas('referencias', P.REFERENCIAS, st.r.referencias, { multi: true })}</fieldset>
+      <fieldset><legend>Quando você vai decorar ou comprar um móvel, o que mais te trava?</legend>
+        <p class="dica">Pode marcar mais de uma.</p>${escolhas('travas', P.TRAVAS, st.r.travas, { multi: true })}</fieldset>
+      <fieldset><legend>O que você mais gostaria de ver no meu Instagram?</legend>
+        <p class="dica">Opcional. Pode marcar mais de uma.</p>${escolhas('conteudo', P.CONTEUDO, st.r.conteudo, { multi: true })}</fieldset>`,
+    valido: () => st.r.acompanha && st.r.referencias.length && st.r.travas.length,
+  },
   momento: {
     html: () => `
-      <p class="eyebrow">6 · O momento da casa</p>
-      <h2 tabindex="-1">Para fechar</h2>
-      <fieldset><legend>Por quanto tempo você pretende ficar neste imóvel?</legend>${escolhas('tempo', P.TEMPO, st.r.tempo)}</fieldset>
+      <p class="eyebrow">8 · Para fechar</p>
+      <h2 tabindex="-1">Última tela</h2>
       <fieldset><legend>Como você conheceu o escritório?</legend>${escolhas('origem', P.ORIGEM, st.r.origem)}
         ${st.r.origem === 'indicacao' ? `<label class="sub">Nome de quem indicou<input type="text" data-campo="indicacao" value="${h(st.r.indicacao)}" maxlength="120"></label>` : ''}</fieldset>
       <label class="consentimento"><input type="checkbox" data-campo="consentimento"${st.r.consentimento ? ' checked' : ''}>
         <span>Concordo que o escritório GP. guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento.</span></label>
       <p class="erro" id="erro-envio" role="alert"></p>`,
     botao: 'Ver o meu diagnóstico',
-    valido: () => st.r.tempo && st.r.origem && st.r.consentimento,
+    valido: () => st.r.origem && st.r.consentimento,
   },
   resultado: { html: () => htmlResultado(), semContinuar: true },
 };
@@ -231,9 +256,27 @@ function htmlResultado() {
   if (!res) return '';
   const primeiroNome = st.r.nome.trim().split(/\s+/)[0];
   const ig = linkInstagram();
+  const ordemCasa = [...res.ambientes].sort((x, y) => st.r.ambientes.indexOf(x.id) - st.r.ambientes.indexOf(y.id) || (x.existe ? 0 : 1) - (y.existe ? 0 : 1));
+  const geral = faixaSaude(res.saude);
   return `
     <p class="eyebrow">O diagnóstico da sua casa</p>
     <h1 tabindex="-1">Preparado para ${h(primeiroNome)}</h1>
+    <section class="saude" aria-labelledby="t-saude">
+      <div class="saude-cab">
+        <h2 id="t-saude">Saúde da casa</h2>
+        <p class="saude-nota ${geral.id}"><b>${res.saude}</b>/100</p>
+      </div>
+      <p class="dica">Toque num ambiente para ver o porquê.</p>
+      <div class="saude-grade">
+        ${ordemCasa.map((a) => {
+          const f = faixaSaude(a.saude);
+          return `<a class="comodo ${f.id}" href="#r-${h(a.id)}">
+            <span class="comodo-nome">${h(a.nome)}</span>
+            <span class="comodo-barra" role="img" aria-label="Saúde ${a.saude} de 100"><span style="width:${Math.max(a.saude, 4)}%"></span></span>
+            <small>${a.existe ? f.nome : 'ainda não existe'}</small></a>`;
+        }).join('')}
+      </div>
+    </section>
     <section class="estado estado-${res.estado.id}">
       <p class="eyebrow">Estado geral</p>
       <p class="estado-nome">${h(res.estado.nome)}</p>
@@ -242,22 +285,25 @@ function htmlResultado() {
     <h2 class="sec">Por onde começar</h2>
     <ol class="ranking">
       ${res.ambientes.map((a) => `
-        <li class="q${a.quadrante}">
+        <li class="q${a.quadrante}" id="r-${h(a.id)}">
           <div class="rk-cab"><span class="rk-nome">${h(a.nome)}</span><span class="selo">${a.quadrante} · ${h(a.quadranteNome)}</span></div>
           <p><b>Por quê:</b> ${h(a.porque)}</p>
           <p><b>Direção:</b> ${h(a.direcao)}</p>
         </li>`).join('')}
     </ol>
-    <section class="passo">
-      <p class="eyebrow">O seu próximo passo</p>
+    <section class="convite">
+      <p class="convite-abre">${h(res.convite.abertura)}</p>
+      <p>${h(res.convite.texto)}</p>
+      <p>${h(res.convite.fecho)}</p>
+      <p class="eyebrow passo-titulo">O seu próximo passo</p>
       <p>${h(res.caminho.frase)}</p>
+      <p class="assinatura">Gabriele Pinheiro</p>
+      <p class="rodape">Design de interiores online</p>
     </section>
     <div class="acoes nao-imprimir">
       ${ig ? `<a class="btn" href="${ig}" target="_blank" rel="noopener">Falar comigo no direct</a>` : ''}
       <button class="btn sec-btn" type="button" id="imprimir">Salvar em PDF</button>
-    </div>
-    <p class="assinatura">Gabriele Pinheiro</p>
-    <p class="rodape">Design de interiores online</p>`;
+    </div>`;
 }
 
 // ---------- Desenho ----------
@@ -316,8 +362,12 @@ function escolher(grupo, v) {
   if (tipo === 'amb') {
     const a = (r.porAmbiente[ambId] ||= {});
     a[grupo] = grupo === 'estado' ? v : Number(v);
-  } else if (grupo === 'moradores') {
-    alternar(r.moradores, v);
+  } else if (['moradores', 'travas', 'conteudo'].includes(grupo)) {
+    alternar(r[grupo], v);
+  } else if (grupo === 'referencias') {
+    // "Não costumo salvar" não combina com os outros.
+    if (v === 'nao') r.referencias = r.referencias.includes('nao') ? [] : ['nao'];
+    else { r.referencias = r.referencias.filter((id) => id !== 'nao'); alternar(r.referencias, v); }
   } else if (grupo === 'ambientes') {
     alternar(r.ambientes, v);
     const ordem = P.AMBIENTES.map((a) => a.id);

@@ -132,3 +132,36 @@ h2.sec { margin-top: 34px; }
   .ranking li { break-inside: avoid; }
 }
 @media (prefers-reduced-motion: reduce) { .trilho span { transition: none; } }
+
+/* Saúde da casa (como no quadro da família) */
+:root { --saude-boa: #6F8A5B; --saude-media: #D9A441; --saude-baixa: #A8443F; }
+.saude { margin: 22px 0 18px; }
+.saude-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.saude-cab h2 { margin: 0; }
+.saude-nota { margin: 0; font-size: .95rem; color: var(--muted); }
+.saude-nota b { font: 500 2rem var(--f-display); color: var(--fg); }
+.saude-nota.boa b { color: var(--saude-boa); }
+.saude-nota.media b { color: #B5862A; }
+.saude-nota.baixa b { color: var(--saude-baixa); }
+.saude .dica { margin: 2px 0 12px; }
+.saude-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.comodo { display: flex; flex-direction: column; gap: 7px; min-width: 0; text-decoration: none; color: var(--fg);
+  border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
+.comodo:hover { border-color: var(--taupe); }
+.comodo-nome { font-weight: 500; font-size: .9rem; overflow-wrap: anywhere; }
+.comodo-barra { height: 8px; border-radius: 9px; background: #EEEAE3; overflow: hidden; }
+.comodo-barra span { display: block; height: 100%; border-radius: 9px; }
+.comodo.boa .comodo-barra span { background: var(--saude-boa); }
+.comodo.media .comodo-barra span { background: var(--saude-media); }
+.comodo.baixa .comodo-barra span { background: var(--saude-baixa); }
+.comodo small { color: var(--muted); font-size: .75rem; }
+.comodo.baixa small { color: var(--saude-baixa); font-weight: 500; }
+.ranking li { scroll-margin-top: 80px; }
+.ranking li:target { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* Convite final */
+.convite { background: var(--accent-soft); border-radius: 4px; padding: 22px 20px; margin-top: 28px; }
+.convite-abre { font: italic 400 1.35rem/1.35 var(--f-display); margin-bottom: 12px; }
+.convite .passo-titulo { margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(80, 84, 59, .2); }
+.convite .assinatura { margin-top: 18px; }
+@media (min-width: 560px) { .saude-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

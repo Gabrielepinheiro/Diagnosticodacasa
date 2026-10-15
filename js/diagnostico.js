@@ -1,9 +1,20 @@
 // A matriz de prioridade: transforma as respostas no resultado.
 // Não depende do navegador, para poder ser testada (tests/diagnostico.test.mjs).
 
-import { ATRITOS, FALTAS, ESTADO, nomeAmbiente } from './perguntas.js';
+import { ATRITOS, FALTAS, ESTADO, nomeAmbiente, artigoAmbiente } from './perguntas.js';
 
 export const IMPACTO_ALTO = 6;
+
+// Saúde da casa: 100 = o ambiente não pesa nada; cai até 0 quando o impacto chega a 12 pontos.
+// Com o impacto alto (6), a saúde fica em 50.
+export const IMPACTO_SAUDE_ZERO = 12;
+export const FAIXAS_SAUDE = [
+  { id: 'boa', min: 70, nome: 'em paz' },
+  { id: 'media', min: 40, nome: 'pede atenção' },
+  { id: 'baixa', min: 0, nome: 'pede cuidado' },
+];
+export const faixaSaude = (n) => FAIXAS_SAUDE.find((f) => n >= f.min);
+const saudeAmbiente = (impacto) => Math.round(100 * (1 - Math.min(impacto, IMPACTO_SAUDE_ZERO) / IMPACTO_SAUDE_ZERO));
 
 export const QUADRANTES = {
   1: { nome: 'Comece por aqui', direcao: 'Os móveis já estão aqui. Luz, tecidos, arte e objetos certos devolvem a sensação de lar com poucas compras.' },
@@ -58,7 +69,7 @@ function listaNomes(ids) {
   return nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
 }
 
-function montarCaminho(estadoId, ambientes) {
+function montarCaminho(estadoId, ambientes, r) {
   const primeiro = ambientes[0];
   const doQuadrante = (...qs) => ambientes.filter((a) => qs.includes(a.quadrante)).map((a) => a.id);
 
@@ -67,7 +78,7 @@ function montarCaminho(estadoId, ambientes) {
     return {
       linha: 'Premier',
       ambientes: ids,
-      frase: 'Com base no seu diagnóstico, o caminho que indico para começar é a Premier, uma call para montar a estratégia da casa inteira. Em até 2 dias úteis, envio a você os detalhes.',
+      frase: 'O caminho que indico para começar é a Premier, uma call para montar a estratégia da casa inteira. Em até 2 dias úteis, envio a você os detalhes.',
       nota: '3 ou mais ambientes de impacto alto: Premier.',
     };
   }
@@ -76,7 +87,7 @@ function montarCaminho(estadoId, ambientes) {
     return {
       linha: 'Collection ou Essence',
       ambientes: ids,
-      frase: `Com base no seu diagnóstico, o caminho que indico para começar é a Collection ou o Essence para ${listaNomes(ids)}, conforme o quanto de acompanhamento você quer. Em até 2 dias úteis, envio a você os detalhes.`,
+      frase: `O caminho que indico para começar é a Collection ou o Essence para ${listaNomes(ids)}, conforme o quanto de acompanhamento você quer. Em até 2 dias úteis, envio a você os detalhes.`,
       nota: 'Casa em paz: Collection ou Essence, conforme o acompanhamento desejado.',
     };
   }
@@ -85,16 +96,50 @@ function montarCaminho(estadoId, ambientes) {
     return {
       linha: 'Essence',
       ambientes: ids,
-      frase: `Com base no seu diagnóstico, o caminho que indico para começar é o Essence para ${listaNomes(ids)}. Em até 2 dias úteis, envio a você os detalhes.`,
-      nota: 'Primeiro da lista no quadrante 1: Essence.',
+      frase: `O caminho que indico para começar é o Essence para ${listaNomes(ids)}. Em até 2 dias úteis, envio a você os detalhes.`,
+      nota: 'Primeiro da lista no quadrante 1: Essence.' + (r.pintura === 'sim' ? ' Quer mudar paredes: avaliar Personalité.' : ''),
     };
   }
   const ids = doQuadrante(1, 2);
+  if (r.pintura === 'sim') {
+    return {
+      linha: 'Personalité',
+      ambientes: ids,
+      frase: `O caminho que indico para começar é o Personalité para ${listaNomes(ids)}, que inclui a pintura e o papel de parede que você quer. Em até 2 dias úteis, envio a você os detalhes.`,
+      nota: 'Primeiro da lista no quadrante 2 e vontade de mudar paredes: Personalité.',
+    };
+  }
+  if (r.pintura === 'nao') {
+    return {
+      linha: 'Maison',
+      ambientes: ids,
+      frase: `O caminho que indico para começar é o Maison para ${listaNomes(ids)}. Em até 2 dias úteis, envio a você os detalhes.`,
+      nota: 'Primeiro da lista no quadrante 2, sem mudar paredes: Maison.',
+    };
+  }
   return {
     linha: 'Maison',
     ambientes: ids,
-    frase: `Com base no seu diagnóstico, o caminho que indico para começar é o Maison para ${listaNomes(ids)}. Se você tiver vontade de pintar ou colocar papel de parede, o caminho passa a ser o Personalité. Em até 2 dias úteis, envio a você os detalhes.`,
+    frase: `O caminho que indico para começar é o Maison para ${listaNomes(ids)}. Se você tiver vontade de pintar ou colocar papel de parede, o caminho passa a ser o Personalité. Em até 2 dias úteis, envio a você os detalhes.`,
     nota: 'Primeiro da lista no quadrante 2: Maison. Se houver vontade de mudar paredes (pintura, papel de parede): Personalité. Confirmar no briefing.',
+  };
+}
+
+const CONVITE = {
+  1: 'Você já usa muito este ambiente e, com poucos ajustes, ele pode mudar a forma como você se sente em casa já nas próximas semanas.',
+  2: 'É ali que está a maior transformação da sua casa. Quando ele estiver resolvido, a rotina inteira fica mais leve.',
+  3: 'A sua casa já tem uma boa base. Começar por aqui é o jeito de trazer ainda mais de você para ela, com calma.',
+  4: 'A sua casa já tem uma boa base. Começar por aqui é o jeito de trazer ainda mais de você para ela, com calma.',
+};
+
+function montarConvite(nome, primeiro) {
+  const n = primeiro.id === 'keller' ? primeiro.nome : minuscula(primeiro.nome);
+  const pelo = artigoAmbiente(primeiro.id) === 'a' ? 'pela' : 'pelo';
+  const primeiroNome = (nome || '').trim().split(/\s+/)[0];
+  return {
+    abertura: `${primeiroNome ? primeiroNome + ', com' : 'Com'} base no seu diagnóstico, eu sugiro que você comece ${pelo} ${n}.`,
+    texto: CONVITE[primeiro.quadrante],
+    fecho: 'Uma casa não fica pronta de uma vez. Ela vai ficando sua, um ambiente de cada vez.',
   };
 }
 
@@ -145,6 +190,7 @@ export function calcular(r) {
     a.quadranteNome = QUADRANTES[a.quadrante].nome;
     a.direcao = a.quadrante === 2 && r.tempo === 'menos2' ? DIRECAO_2_CURTO_PRAZO : QUADRANTES[a.quadrante].direcao;
     a.porque = montarPorque(a, r.tempo);
+    a.saude = saudeAmbiente(a.impacto);
     return a;
   });
 
@@ -159,11 +205,17 @@ export function calcular(r) {
   const altos = ambientes.filter((a) => a.impactoAlto).length;
   const estadoId = altos === 0 ? 'paz' : altos <= 2 ? 'atencao' : 'cuidado';
 
+  // Saúde geral: média ponderada pelo uso; quem não existe ainda pesa como "raramente".
+  const peso = (a) => (a.existe ? a.freq : 1);
+  const saude = Math.round(ambientes.reduce((s, a) => s + a.saude * peso(a), 0) / ambientes.reduce((s, a) => s + peso(a), 0));
+
   return {
-    versao: 1,
+    versao: 2,
+    saude,
     estado: { id: estadoId, ...ESTADOS[estadoId], impactoAlto: altos },
     ambientes,
-    caminho: montarCaminho(estadoId, ambientes),
+    convite: montarConvite(r.nome, ambientes[0]),
+    caminho: montarCaminho(estadoId, ambientes, r),
   };
 }
 
@@ -173,8 +225,10 @@ export function textoResultado(nome, res) {
     'O DIAGNÓSTICO DA SUA CASA',
     `Preparado para ${nome}`,
     '',
-    `ESTADO GERAL: ${res.estado.nome}`,
+    res.saude != null ? `SAÚDE DA CASA: ${res.saude}/100 · ${res.estado.nome}` : `ESTADO GERAL: ${res.estado.nome}`,
     res.estado.frase,
+    '',
+    ...[...res.ambientes].filter((a) => a.saude != null).sort((x, y) => x.saude - y.saude).map((a) => `   ${a.nome}: ${a.saude}/100 · ${faixaSaude(a.saude).nome}`),
     '',
     'POR ONDE COMEÇAR',
     '',
@@ -185,6 +239,7 @@ export function textoResultado(nome, res) {
     linhas.push(`   Direção: ${a.direcao}`);
     linhas.push('');
   });
+  if (res.convite) linhas.push('POR ONDE EU COMEÇARIA', `${res.convite.abertura} ${res.convite.texto}`, res.convite.fecho, '');
   linhas.push('O SEU PRÓXIMO PASSO', res.caminho.frase, '', 'Gabriele Pinheiro · Design de interiores online');
   return linhas.join('\n');
 }

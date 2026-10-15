@@ -4,7 +4,7 @@ O caminho do cliente:
 
 1. Vê o seu conteúdo e envia **DIAGNÓSTICO** no direct do Instagram.
 2. Recebe a senha e o link (automático ou enviado por você).
-3. Abre o aplicativo no celular, digita a senha e responde em cerca de 5 minutos.
+3. Abre o aplicativo no celular, digita a senha e responde em cerca de 6 minutos.
 4. Vê na tela o estado geral da casa, os ambientes em ordem e o próximo passo.
 5. Você recebe tudo no **painel** (`/admin.html`): respostas, pontos, quadrantes e o caminho indicado (Premier, Essence, Maison…).
 
@@ -76,7 +76,7 @@ Oi! Que bom que você quer olhar para a sua casa com calma.
 
 A sua senha para o Diagnóstico da Casa é: CASA
 
-É só abrir https://diagnostico.onrender.com e digitar a senha. Leva cerca de 5 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
+É só abrir https://diagnostico.onrender.com e digitar a senha. Leva cerca de 6 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
 
 Qualquer dúvida, é só me chamar aqui.
 Gabriele

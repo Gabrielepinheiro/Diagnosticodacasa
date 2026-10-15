@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import * as P from './perguntas.js';
-import { textoResultado } from './diagnostico.js';
+import { textoResultado, faixaSaude } from './diagnostico.js';
 import * as api from './api.js';
 
 const painel = document.getElementById('painel');
@@ -54,7 +54,7 @@ function mensagemDirect(s) {
 
 A sua senha para o Diagnóstico da Casa é: ${s.codigo}
 
-É só abrir ${s.tipo === 'individual' ? linkComSenha(s.codigo) : linkApp()} e digitar a senha. Leva cerca de 5 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
+É só abrir ${s.tipo === 'individual' ? linkComSenha(s.codigo) : linkApp()} e digitar a senha. Leva cerca de 6 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
 
 Qualquer dúvida, é só me chamar aqui.
 Gabriele`;
@@ -134,6 +134,7 @@ function desenhar() {
   abas.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.aba === aba)));
   abas.querySelector('[data-aba=diagnosticos]').innerHTML = `Diagnósticos${novos ? ` <span class="cont">(${novos})</span>` : ''}`;
   if (aba === 'senhas') painel.innerHTML = htmlSenhas();
+  else if (aba === 'publico') painel.innerHTML = htmlPublico();
   else if (aberto) painel.innerHTML = htmlDetalhe(diagnosticos.find((d) => d.id === aberto));
   else painel.innerHTML = htmlLista();
 }
@@ -153,7 +154,8 @@ function htmlLista() {
           <span><span class="nome">${h(d.nome)}</span>
             <span class="meta">${d.instagram ? '@' + h(d.instagram) + ' · ' : ''}${h(dataHora(d.criado_em))}</span><br>
             <span class="meta">${h(d.estado)} · Caminho: ${h(d.caminho)} · Nº 1: ${h(d.resultado?.ambientes?.[0]?.nome)}</span></span>
-          <span class="dir"><span class="pilula ${d.status === 'novo' ? 'novo' : ''}">${h(STATUS[d.status])}</span></span>
+          <span class="dir"><span class="pilula ${d.status === 'novo' ? 'novo' : ''}">${h(STATUS[d.status])}</span>
+            ${d.respostas?.inicio === 'mes' ? '<span class="pilula ok">Quer começar este mês</span>' : ''}</span>
         </button>`).join('') : '<p class="vazio">Nenhum diagnóstico aqui ainda.</p>'}
     </div>`;
 }
@@ -161,6 +163,10 @@ function htmlLista() {
 function evitaTxt(evita) {
   const ids = (Array.isArray(evita) ? evita : [evita]).filter((id) => id && id !== 'nenhum');
   return ids.length ? ids.map(P.nomeAmbiente).join(', ') : 'Nenhum';
+}
+
+function lista(opcoes, ids) {
+  return (ids || []).map((id) => rotulo(opcoes, id)).join(' · ') || '—';
 }
 
 function rotulo(lista, id) { return lista.find((o) => (o.v ?? o.id) === id)?.t ?? id; }
@@ -191,7 +197,7 @@ function htmlDetalhe(d) {
         <p class="eyebrow">Estado geral</p>
         <h2>${h(res.estado.nome)}</h2>
         <p>${h(res.estado.frase)}</p>
-        <p class="pontos">${h(res.estado.impactoAlto)} ambiente(s) com impacto alto</p>
+        <p class="pontos">${h(res.estado.impactoAlto)} ambiente(s) com impacto alto${res.saude != null ? ` · Saúde da casa ${h(res.saude)}/100` : ''}</p>
       </section>
       <section class="cartao">
         <p class="eyebrow">Caminho indicado</p>
@@ -207,7 +213,7 @@ function htmlDetalhe(d) {
           <li class="q${h(a.quadrante)}">
             <div class="rk-cab"><span class="rk-nome">${h(a.nome)}${a.existe ? '' : ' <small>(não existe hoje)</small>'}</span><span class="selo">${h(a.quadrante)} · ${h(a.quadranteNome)}</span></div>
             <p><b>Por quê:</b> ${h(a.porque)}</p>
-            <p class="pontos">Impacto ${h(a.impacto)} = paz × uso ${h(a.pontos.pazFrequencia)} + atritos ${h(a.pontos.atritos)} + faltas ${h(a.pontos.faltas)} + evita ${h(a.pontos.evita)} + prioridade ${h(a.pontos.prioridade)}
+            <p class="pontos">${a.saude != null ? `Saúde ${h(a.saude)} · ` : ""}Impacto ${h(a.impacto)} = paz × uso ${h(a.pontos.pazFrequencia)} + atritos ${h(a.pontos.atritos)} + faltas ${h(a.pontos.faltas)} + evita ${h(a.pontos.evita)} + prioridade ${h(a.pontos.prioridade)}
               · Esforço ${a.esforcoLeve ? 'leve' : 'maior'}${a.existe ? ` (${h(rotulo(P.ESTADO, a.estado))})` : ''}</p>
           </li>`).join('')}
       </ol>
@@ -224,10 +230,67 @@ function htmlDetalhe(d) {
         <dt>O que falta (P9)</dt><dd>${h(r.faltas.map((x) => escolhaTxt(P.FALTAS, x)).join(' · '))}</dd>
         <dt>Evita mostrar (P10)</dt><dd>${h(evitaTxt(r.evita))}</dd>
         <dt>Pronto este mês (P11)</dt><dd>${h(P.nomeAmbiente(r.prioridade))}</dd>
+        <dt>Imóvel</dt><dd>${h(rotulo(P.IMOVEL, r.imovel))}</dd>
         <dt>Tempo no imóvel</dt><dd>${h(rotulo(P.TEMPO, r.tempo))}</dd>
+        <dt>Mudar paredes</dt><dd>${h(rotulo(P.PINTURA, r.pintura))}</dd>
+        <dt>Quando começar</dt><dd>${h(rotulo(P.INICIO, r.inicio))}</dd>
+        <dt>Acompanha decoração</dt><dd>${h(rotulo(P.ACOMPANHA, r.acompanha))}</dd>
+        <dt>Referências</dt><dd>${h(lista(P.REFERENCIAS, r.referencias))}</dd>
+        <dt>O que trava</dt><dd>${h(lista(P.TRAVAS, r.travas))}</dd>
+        <dt>Quer ver no Instagram</dt><dd>${h(lista(P.CONTEUDO, r.conteudo))}</dd>
         <dt>Como conheceu</dt><dd>${h(rotulo(P.ORIGEM, r.origem))}${r.indicacao ? ` · indicação de ${h(r.indicacao)}` : ''}</dd>
       </dl>
     </section>`;
+}
+
+// Público: soma as respostas de todos os diagnósticos.
+function contagem(opcoes, valores) {
+  const n = {};
+  valores.forEach((v) => [].concat(v ?? []).forEach((id) => { n[id] = (n[id] || 0) + 1; }));
+  return opcoes.map((o) => ({ t: o.t, n: n[o.v ?? o.id] || 0 })).sort((a, b) => b.n - a.n);
+}
+
+function blocoPublico(titulo, opcoes, valores, nota = '') {
+  const total = valores.filter((v) => v != null && v !== '' && !(Array.isArray(v) && !v.length)).length;
+  const linhas = contagem(opcoes, valores).filter((l) => l.n);
+  return `<section class="cartao">
+    <p class="eyebrow">${h(titulo)}</p>
+    ${nota ? `<p class="dica">${h(nota)}</p>` : ''}
+    ${linhas.length ? `<div class="barras">${linhas.map((l) => {
+      const pct = Math.round((l.n / total) * 100);
+      return `<div class="barra-linha"><span class="barra-t">${h(l.t)}</span><span class="barra-n">${pct}% · ${l.n}</span>
+        <span class="barra"><span style="width:${pct}%"></span></span></div>`;
+    }).join('')}</div>` : '<p class="vazio">Ainda sem respostas.</p>'}
+  </section>`;
+}
+
+function htmlPublico() {
+  const rs = diagnosticos.map((d) => d.respostas || {});
+  const res = diagnosticos.map((d) => d.resultado || {});
+  if (!rs.length) return '<p class="vazio">Quando chegarem os primeiros diagnósticos, o resumo do seu público aparece aqui.</p>';
+  const saudes = res.map((x) => x.saude).filter((n) => typeof n === 'number');
+  const media = saudes.length ? Math.round(saudes.reduce((a, b) => a + b, 0) / saudes.length) : null;
+  const primeiros = res.map((x) => x.ambientes?.[0]?.id);
+  return `
+    <div class="grade2">
+      <section class="cartao"><p class="eyebrow">Diagnósticos</p><p class="codigo-grande">${diagnosticos.length}</p></section>
+      <section class="cartao"><p class="eyebrow">Saúde média das casas</p><p class="codigo-grande">${media ?? '—'}${media != null ? '<small>/100</small>' : ''}</p></section>
+    </div>
+    <p class="dica">Porcentagem sobre quem respondeu cada pergunta. Nas perguntas de várias opções, a soma passa de 100%.</p>
+    <div class="grade2">
+      ${blocoPublico('O que mais trava na hora de decorar', P.TRAVAS, rs.map((r) => r.travas), 'Bom ponto de partida para conteúdo e para a sua comunicação.')}
+      ${blocoPublico('O que querem ver no Instagram', P.CONTEUDO, rs.map((r) => r.conteudo))}
+      ${blocoPublico('Acompanha perfis de decoração', P.ACOMPANHA, rs.map((r) => r.acompanha))}
+      ${blocoPublico('Onde salva referências', P.REFERENCIAS, rs.map((r) => r.referencias))}
+      ${blocoPublico('Ambiente nº 1 do diagnóstico', P.AMBIENTES.map((a) => ({ id: a.id, t: a.nome })), primeiros)}
+      ${blocoPublico('Caminho indicado', ['Premier', 'Essence', 'Maison', 'Personalité', 'Collection ou Essence'].map((t) => ({ id: t, t })), res.map((x) => x.caminho?.linha))}
+      ${blocoPublico('Quando quer começar', P.INICIO, rs.map((r) => r.inicio))}
+      ${blocoPublico('Imóvel', P.IMOVEL, rs.map((r) => r.imovel))}
+      ${blocoPublico('Mudar paredes', P.PINTURA, rs.map((r) => r.pintura))}
+      ${blocoPublico('Quem mora na casa', P.MORADORES, rs.map((r) => r.moradores))}
+      ${blocoPublico('Tempo no imóvel', P.TEMPO, rs.map((r) => r.tempo))}
+      ${blocoPublico('Como conheceu o escritório', P.ORIGEM, rs.map((r) => r.origem))}
+    </div>`;
 }
 
 function htmlSenhas() {
@@ -309,6 +372,12 @@ function markdownNotion(d) {
     `**Evita mostrar:** ${evitaTxt(r.evita)} · **Pronto este mês:** ${P.nomeAmbiente(r.prioridade)}`,
     `**Tempo no imóvel:** ${rotulo(P.TEMPO, r.tempo)} · **Quem mora:** ${r.moradores.map((m) => rotulo(P.MORADORES, m)).join(', ')}`,
     `**Como conheceu:** ${rotulo(P.ORIGEM, r.origem)}${r.indicacao ? ' (' + r.indicacao + ')' : ''}`,
+    `**Imóvel:** ${rotulo(P.IMOVEL, r.imovel)} · **Mudar paredes:** ${rotulo(P.PINTURA, r.pintura)} · **Quando começar:** ${rotulo(P.INICIO, r.inicio)}`,
+    '',
+    `**Acompanha decoração:** ${rotulo(P.ACOMPANHA, r.acompanha)}`,
+    `**Referências:** ${lista(P.REFERENCIAS, r.referencias)}`,
+    `**O que trava:** ${lista(P.TRAVAS, r.travas)}`,
+    `**Quer ver no Instagram:** ${lista(P.CONTEUDO, r.conteudo)}`,
   ];
   return linhas.join('\n');
 }

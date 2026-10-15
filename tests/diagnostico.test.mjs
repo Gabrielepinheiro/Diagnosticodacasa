@@ -135,3 +135,33 @@ test('"Gosto de como ele está" conta como esforço leve', () => {
   assert.equal(res.ambientes[0].esforcoLeve, true);
   assert.equal(res.ambientes[0].quadrante, 3);
 });
+
+test('saúde: 100 sem impacto, 50 no impacto alto, 0 a partir de 12; média pesa o uso', () => {
+  const res = calcular(base({
+    ambientes: ['estar', 'keller'],
+    porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' }, keller: { paz: 0, freq: 1, estado: 'vazio' } },
+    prioridade: 'keller',
+  }));
+  const s = Object.fromEntries(res.ambientes.map((a) => [a.id, a.saude]));
+  assert.equal(s.estar, 50);  // impacto 6
+  assert.equal(s.keller, 83); // impacto 2
+  assert.equal(res.saude, Math.round((50 * 3 + 83 * 1) / 4));
+  const cheio = calcular(base({ ambientes: ['cozinha'], porAmbiente: { cozinha: { paz: 3, freq: 3, estado: 'vazio' } }, evita: ['cozinha'], prioridade: 'cozinha' }));
+  assert.equal(cheio.ambientes[0].saude, 0);
+});
+
+test('convite usa o nome e o artigo do ambiente nº 1', () => {
+  const res = calcular(base({ ambientes: ['servico'], porAmbiente: { servico: { paz: 3, freq: 3, estado: 'vazio' } } }));
+  assert.equal(res.convite.abertura, 'Ana, com base no seu diagnóstico, eu sugiro que você comece pela área de serviço.');
+  const k = calcular(base({ ambientes: ['keller'], porAmbiente: { keller: { paz: 3, freq: 3, estado: 'vazio' } } }));
+  assert.match(k.convite.abertura, /comece pelo Keller\.$/);
+});
+
+test('vontade de pintar leva o quadrante 2 ao Personalité', () => {
+  const r = { ambientes: ['cozinha'], porAmbiente: { cozinha: { paz: 3, freq: 3, estado: 'vazio' } } };
+  assert.equal(calcular(base({ ...r, pintura: 'sim' })).caminho.linha, 'Personalité');
+  assert.equal(calcular(base({ ...r, pintura: 'nao' })).caminho.linha, 'Maison');
+  const talvez = calcular(base({ ...r, pintura: 'talvez' })).caminho;
+  assert.equal(talvez.linha, 'Maison');
+  assert.match(talvez.frase, /Personalité/);
+});

@@ -3,19 +3,21 @@
 // ou null (a pessoa escolhe qualquer ambiente).
 
 export const AMBIENTES = [
-  { id: 'hall', nome: 'Hall de entrada' },
-  { id: 'estar', nome: 'Sala de estar' },
-  { id: 'jantar', nome: 'Sala de jantar', obs: 'ou estar e jantar integradas' },
-  { id: 'cozinha', nome: 'Cozinha' },
-  { id: 'casal', nome: 'Quarto de casal' },
-  { id: 'infantil', nome: 'Quarto infantil' },
-  { id: 'office', nome: 'Home office' },
-  { id: 'banheiro', nome: 'Banheiro' },
-  { id: 'lavanderia', nome: 'Lavanderia' },
-  { id: 'servico', nome: 'Área de serviço' },
-  { id: 'keller', nome: 'Keller', obs: 'porão ou depósito' },
-  { id: 'varanda', nome: 'Varanda ou terraço' },
+  { id: 'hall', art: 'o', nome: 'Hall de entrada' },
+  { id: 'estar', art: 'a', nome: 'Sala de estar' },
+  { id: 'jantar', art: 'a', nome: 'Sala de jantar', obs: 'ou estar e jantar integradas' },
+  { id: 'cozinha', art: 'a', nome: 'Cozinha' },
+  { id: 'casal', art: 'o', nome: 'Quarto de casal' },
+  { id: 'infantil', art: 'o', nome: 'Quarto infantil' },
+  { id: 'office', art: 'o', nome: 'Home office' },
+  { id: 'banheiro', art: 'o', nome: 'Banheiro' },
+  { id: 'lavanderia', art: 'a', nome: 'Lavanderia' },
+  { id: 'servico', art: 'a', nome: 'Área de serviço' },
+  { id: 'keller', art: 'o', nome: 'Keller', obs: 'porão ou depósito' },
+  { id: 'varanda', art: 'a', nome: 'Varanda ou terraço' },
 ];
+
+export const artigoAmbiente = (id) => AMBIENTES.find((a) => a.id === id)?.art ?? 'o';
 
 export const nomeAmbiente = (id) => AMBIENTES.find((a) => a.id === id)?.nome ?? id;
 
@@ -85,6 +87,61 @@ export const ORIGEM = [
   { id: 'indicacao', t: 'Indicação' },
   { id: 'google', t: 'Google' },
   { id: 'outro', t: 'Outro' },
+];
+
+// Os planos para a casa: ajudam a indicar a linha de serviço e a prioridade no painel.
+export const IMOVEL = [
+  { id: 'proprio', t: 'Próprio' },
+  { id: 'alugado', t: 'Alugado' },
+];
+
+export const PINTURA = [
+  { id: 'sim', t: 'Sim, gostaria de mudar as paredes' },
+  { id: 'talvez', t: 'Talvez, se fizer sentido no projeto' },
+  { id: 'nao', t: 'Não, quero manter as paredes como estão' },
+];
+
+export const INICIO = [
+  { id: 'mes', t: 'Ainda este mês' },
+  { id: 'tres_meses', t: 'Nos próximos 3 meses' },
+  { id: 'pesquisando', t: 'Ainda estou pesquisando' },
+];
+
+// Você e a decoração: para o escritório conhecer o público.
+export const ACOMPANHA = [
+  { id: 'diario', t: 'Todos os dias, adoro' },
+  { id: 'semana', t: 'Algumas vezes por semana' },
+  { id: 'as_vezes', t: 'De vez em quando' },
+  { id: 'quase_nunca', t: 'Quase nunca' },
+];
+
+export const REFERENCIAS = [
+  { id: 'pinterest', t: 'Salvo no Pinterest' },
+  { id: 'instagram', t: 'Salvo nos favoritos do Instagram' },
+  { id: 'prints', t: 'Tiro prints e guardo no celular' },
+  { id: 'lojas', t: 'Guardo links de lojas e produtos' },
+  { id: 'nao', t: 'Não costumo salvar', nenhum: true },
+];
+
+export const TRAVAS = [
+  { id: 'gosto_pratica', t: 'Sinto que tenho bom gosto, mas não sei colocar em prática' },
+  { id: 'medo_errar', t: 'Tenho medo de gastar e me arrepender' },
+  { id: 'combinar', t: 'Não sei se as coisas vão combinar entre si' },
+  { id: 'medidas', t: 'Não sei as medidas certas (tamanho do sofá, do tapete, altura dos quadros)' },
+  { id: 'decidir', t: 'Tenho muitas referências e não consigo decidir' },
+  { id: 'tempo', t: 'Falta tempo para pesquisar e comprar' },
+  { id: 'encontrar', t: 'Não encontro onde moro as coisas no estilo que eu gosto' },
+  { id: 'opinioes', t: 'Cada pessoa da casa quer uma coisa' },
+  { id: 'comecar', t: 'Não sei por onde começar' },
+];
+
+export const CONTEUDO = [
+  { id: 'antes_depois', t: 'Antes e depois de projetos' },
+  { id: 'medidas', t: 'Dicas de medidas e de layout' },
+  { id: 'onde_comprar', t: 'Onde comprar e achados' },
+  { id: 'cores', t: 'Combinação de cores e materiais' },
+  { id: 'alugado', t: 'Como decorar um imóvel alugado' },
+  { id: 'bastidores', t: 'Bastidores dos projetos' },
 ];
 
 export const MAX_ESCOLHAS = 3;

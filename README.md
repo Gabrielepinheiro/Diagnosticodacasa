@@ -2,14 +2,14 @@
 
 Aplicativo do escritório Gabriele Pinheiro · Design de interiores online.
 
-A pessoa pede a senha no direct do Instagram, responde o diagnóstico no celular (cerca de 5 minutos) e recebe os ambientes da casa em ordem de prioridade, com uma direção de por onde começar. O escritório recebe as respostas num painel e indica o caminho: Premier, Essence, Maison ou Personalité.
+A pessoa pede a senha no direct do Instagram, responde o diagnóstico no celular (cerca de 6 minutos) e recebe os ambientes da casa em ordem de prioridade, com uma direção de por onde começar. O escritório recebe as respostas num painel e indica o caminho: Premier, Essence, Maison ou Personalité.
 
 **Para colocar no ar: [GUIA.md](GUIA.md).**
 
 ## Telas
 
-- `index.html`: o aplicativo do cliente. Senha → abertura → 6 blocos de perguntas (uma tela por ambiente) → resultado. O rascunho fica salvo no celular, caso a pessoa feche a página no meio.
-- `admin.html`: o painel do escritório. Gera senhas e mostra os diagnósticos recebidos, com os pontos de cada ambiente, o caminho indicado e botões para enviar por e-mail e copiar para o Notion.
+- `index.html`: o aplicativo do cliente. Senha → abertura → 8 blocos de perguntas (uma tela por ambiente) → resultado com a saúde da casa. O rascunho fica salvo no celular, caso a pessoa feche a página no meio.
+- `admin.html`: o painel do escritório. Gera senhas e mostra os diagnósticos recebidos, com os pontos de cada ambiente, o caminho indicado e botões para enviar por e-mail e copiar para o Notion. A aba Público soma as respostas de todos os clientes (travas, referências, o que querem ver no Instagram…).
 
 ## Senhas
 

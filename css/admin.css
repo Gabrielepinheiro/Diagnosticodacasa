@@ -65,3 +65,11 @@ dl.resp dd { margin: 0; }
   .item { grid-template-columns: 1fr; }
   .item .dir { justify-items: start; text-align: left; grid-auto-flow: column; justify-content: start; gap: 8px; }
 }
+
+/* Público */
+.barras { display: grid; gap: 12px; margin-top: 6px; }
+.barra-linha { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: .88rem; }
+.barra-n { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.barra { grid-column: 1 / -1; height: 8px; border-radius: 9px; background: #EEEAE3; overflow: hidden; }
+.barra span { display: block; height: 100%; border-radius: 9px; background: var(--accent); }
+.codigo-grande small { font-size: 1rem; color: var(--muted); letter-spacing: 0; }
