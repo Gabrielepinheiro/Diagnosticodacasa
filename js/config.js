@@ -10,7 +10,7 @@ export const CONFIG = {
   supabaseKey: 'sb_publishable_xszK5v6eFY7Hia37LxlXaQ_4y7CUNoJ',
 
   // Perfil do Instagram, sem o @. Aparece na tela da senha e no botão do resultado.
-  instagram: '',
+  instagram: 'gabrielepinhheiro',
 
   // Palavra que a pessoa envia no direct para pedir a senha.
   palavraChave: 'DIAGNÓSTICO',

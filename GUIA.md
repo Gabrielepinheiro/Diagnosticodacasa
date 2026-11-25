@@ -47,7 +47,7 @@ Para dar acesso a uma assistente depois: repita os passos 3 e 4 com o e-mail del
 
 1. Em https://render.com, clique em **New → Static Site** e escolha o repositório `Diagnosticodacasa`.
 2. Preencha:
-   - Name: `diagnostico` (vira `https://diagnostico.onrender.com`)
+   - Name: `diagnostico` (vira `https://gabrielepinheiro.github.io/Diagnosticodacasa/`)
    - Branch: a branch principal
    - Build Command: deixe vazio
    - Publish Directory: `.`
@@ -55,8 +55,8 @@ Para dar acesso a uma assistente depois: repita os passos 3 e 4 com o e-mail del
 4. Opcional: em **Settings → Custom Domains**, adicione `diagnostico.gabrielepinheiro.com` e crie no Wix o registro CNAME que o Render mostrar.
 
 Endereços:
-- Cliente: `https://diagnostico.onrender.com`
-- Painel: `https://diagnostico.onrender.com/admin.html` (guarde nos favoritos do celular)
+- Cliente: `https://gabrielepinheiro.github.io/Diagnosticodacasa/`
+- Painel: `https://gabrielepinheiro.github.io/Diagnosticodacasa//admin.html` (guarde nos favoritos do celular)
 
 ## 4. O direct do Instagram
 
@@ -74,7 +74,7 @@ Uma palavra que todos recebem (ex.: `CASA`). Ideal para a resposta automática, 
 ```
 Oi! Aqui está a sua senha para o Diagnóstico da casa: CASA
 
-Abra https://diagnostico.onrender.com e digite a senha. Em cerca de 6 minutos, você responde como usa cada ambiente e recebe a ordem de prioridade da casa, com o motivo de cada posição.
+Abra https://gabrielepinheiro.github.io/Diagnosticodacasa/ e digite a senha. Em cerca de 6 minutos, você responde como usa cada ambiente e recebe a ordem de prioridade da casa, com o motivo de cada posição.
 
 Se tiver qualquer dúvida, é só me escrever aqui.
 Gabriele
