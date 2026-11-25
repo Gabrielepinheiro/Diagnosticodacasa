@@ -337,6 +337,7 @@ function htmlPublico() {
       ${blocoPublico('Quem mora na casa', P.MORADORES, rs.map((r) => r.moradores))}
       ${blocoPublico('Tempo no imóvel', P.TEMPO, rs.map((r) => r.tempo))}
       ${blocoPublico('Como conheceu o escritório', P.ORIGEM, rs.map((r) => r.origem))}
+      ${blocoPublico('Código usado (de onde veio)', [...new Set(diagnosticos.map((d) => d.codigo).filter(Boolean))].map((c) => ({ id: c, t: c })), diagnosticos.map((d) => d.codigo), 'PERFIL = link do perfil. Os outros são os códigos dos conteúdos e das senhas individuais.')}
     </div>`;
 }
 

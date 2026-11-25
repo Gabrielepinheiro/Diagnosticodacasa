@@ -594,3 +594,5 @@ if (daUrl && (st.passo === 'senha' || st.passo === 'resultado' && normalizarSenh
   st.codigo = normalizarSenha(daUrl);
 }
 render();
+// Link com o código embutido (ex.: o link do perfil, ?s=PERFIL): entra direto, sem digitar a senha.
+if (daUrl && st.passo === 'senha') document.getElementById('f-senha')?.requestSubmit();
