@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import * as P from './perguntas.js';
-import { textoResultado, faixaSaude } from './diagnostico.js';
+import { textoResultado, IMPACTO_ALTO } from './diagnostico.js';
 import * as api from './api.js';
 
 const painel = document.getElementById('painel');
@@ -50,13 +50,11 @@ async function tentar(fn) {
 
 function mensagemDirect(s) {
   const ola = s.nome ? `Oi, ${s.nome.trim().split(/\s+/)[0]}!` : 'Oi!';
-  return `${ola} Que bom que você quer olhar para a sua casa com calma.
+  return `${ola} Aqui está a sua senha para o Diagnóstico da casa: ${s.codigo}
 
-A sua senha para o Diagnóstico da Casa é: ${s.codigo}
+Abra ${s.tipo === 'individual' ? linkComSenha(s.codigo) : linkApp()} e digite a senha. Em cerca de 6 minutos, você responde como usa cada ambiente e recebe a ordem de prioridade da casa, com o motivo de cada posição.
 
-É só abrir ${s.tipo === 'individual' ? linkComSenha(s.codigo) : linkApp()} e digitar a senha. Leva cerca de 6 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
-
-Qualquer dúvida, é só me chamar aqui.
+Se tiver qualquer dúvida, é só me escrever aqui.
 Gabriele`;
 }
 
@@ -67,13 +65,28 @@ function telaLogin(msg = '') {
   botaoSair.hidden = true;
   painel.innerHTML = `
     <form class="login cartao" id="f-login">
-      <p class="eyebrow">Painel do escritório</p>
-      <h1>Diagnóstico da Casa</h1>
+      <p class="rot">Painel do escritório</p>
+      <h1>Diagnóstico da casa</h1>
       ${api.modoDemo ? '<p class="aviso">Modo de teste: o Supabase ainda não está configurado. Entre com qualquer e-mail e senha. Os dados ficam só neste navegador.</p>' : ''}
       <label class="campo">E-mail<input type="email" name="email" autocomplete="username" required></label>
       <label class="campo">Senha<input type="password" name="senha" autocomplete="current-password" required></label>
       <p class="erro" role="alert">${h(msg)}</p>
       <button class="btn" type="submit">Entrar</button>
+      <button class="voltar esqueci" type="button" data-acao="esqueci">Esqueci a senha</button>
+    </form>`;
+}
+
+// Link do e-mail de "esqueci a senha" (ou do convite): a pessoa define uma senha nova.
+function telaNovaSenha(msg = '') {
+  abas.hidden = true;
+  botaoSair.hidden = true;
+  painel.innerHTML = `
+    <form class="login cartao" id="f-nova-senha">
+      <p class="rot">Painel do escritório</p>
+      <h1>Criar uma senha</h1>
+      <label class="campo">Nova senha <small>pelo menos 8 caracteres</small><input type="password" name="senha" autocomplete="new-password" minlength="8" required></label>
+      <p class="erro" role="alert">${h(msg)}</p>
+      <button class="btn" type="submit">Salvar e entrar</button>
     </form>`;
 }
 
@@ -81,6 +94,7 @@ painel.addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const f = ev.target;
   if (f.id === 'f-login') return login(f);
+  if (f.id === 'f-nova-senha') return salvarNovaSenha(f);
   if (f.id === 'f-individual') return novaIndividual(f);
   if (f.id === 'f-campanha') return novaCampanha(f);
 });
@@ -102,6 +116,34 @@ async function login(f) {
     erro.textContent = e.status === 400 ? 'E-mail ou senha incorretos.' : 'Não consegui entrar: ' + e.message;
   } finally {
     botao.disabled = false;
+  }
+}
+
+async function salvarNovaSenha(f) {
+  const erro = f.querySelector('.erro');
+  if (f.senha.value.length < 8) { erro.textContent = 'Use pelo menos 8 caracteres.'; return; }
+  f.querySelector('button').disabled = true;
+  try {
+    await api.definirSenha(f.senha.value);
+    if (!(await api.souEquipe())) { await api.sair(); telaLogin('Este e-mail não está na tabela "equipe" do Supabase.'); return; }
+    avisar('Senha salva');
+    iniciar();
+  } catch (e) {
+    erro.textContent = 'Não consegui salvar: ' + e.message;
+    f.querySelector('button').disabled = false;
+  }
+}
+
+async function esqueciSenha() {
+  const f = document.getElementById('f-login');
+  const erro = f.querySelector('.erro');
+  const email = f.email.value.trim();
+  if (!email) { erro.textContent = 'Digite o seu e-mail acima e toque de novo em "Esqueci a senha".'; return; }
+  try {
+    await api.recuperarSenha(email, location.href.split('#')[0]);
+    erro.textContent = 'Se o e-mail estiver cadastrado, chega um link para criar uma nova senha. Abra o link neste aparelho.';
+  } catch (e) {
+    erro.textContent = 'Não consegui enviar o e-mail: ' + e.message;
   }
 }
 
@@ -181,7 +223,7 @@ function htmlDetalhe(d) {
     <button type="button" class="voltar" data-acao="voltar">← Todos os diagnósticos</button>
     <div class="cartao">
       <div class="det-cab">
-        <div><p class="eyebrow">Recebido em ${h(dataHora(d.criado_em))} · senha ${h(d.codigo)}</p>
+        <div><p class="rot">Recebido em ${h(dataHora(d.criado_em))} · senha ${h(d.codigo)}</p>
           <h1>${h(d.nome)}</h1>
           <p><a href="mailto:${h(d.email)}">${h(d.email)}</a>${d.instagram ? ` · <a href="https://instagram.com/${encodeURIComponent(d.instagram)}" target="_blank" rel="noopener">@${h(d.instagram)}</a>` : ''}</p></div>
         <label class="sub">Status
@@ -195,38 +237,41 @@ function htmlDetalhe(d) {
     </div>
     <div class="grade2">
       <section class="cartao">
-        <p class="eyebrow">Estado geral</p>
+        <p class="rot">Leitura geral</p>
         <h2>${h(res.estado.nome)}</h2>
         <p>${h(res.estado.frase)}</p>
-        <p class="pontos">${h(res.estado.impactoAlto)} ambiente(s) com impacto alto${res.saude != null ? ` · Saúde da casa ${h(res.saude)}/100` : ''}</p>
+        <p class="pontos">${h(res.estado.impactoAlto)} de ${h(res.ambientes.length)} ambiente(s) com impacto alto (${IMPACTO_ALTO} pontos ou mais)</p>
       </section>
       <section class="cartao">
-        <p class="eyebrow">Caminho indicado</p>
+        <p class="rot">Caminho indicado</p>
         <h2>${h(res.caminho.linha)}</h2>
         <p>${h(res.caminho.ambientes.map(P.nomeAmbiente).join(', ') || 'Casa inteira')}</p>
         <p class="nota-interna"><b>Para o escritório:</b> ${h(res.caminho.nota)}</p>
       </section>
     </div>
     <section class="cartao">
-      <p class="eyebrow">Ambientes em ordem</p>
+      <p class="rot">Ambientes em ordem</p>
       <ol class="ranking">
-        ${res.ambientes.map((a) => `
+        ${res.ambientes.map((a, i) => `
           <li class="q${h(a.quadrante)}">
-            <div class="rk-cab"><span class="rk-nome">${h(a.nome)}${a.existe ? '' : ' <small>(não existe hoje)</small>'}</span><span class="selo">${h(a.quadrante)} · ${h(a.quadranteNome)}</span></div>
-            <p><b>Por quê:</b> ${h(a.porque)}</p>
-            <p class="pontos">${a.saude != null ? `Saúde ${h(a.saude)} · ` : ""}Impacto ${h(a.impacto)} = paz × uso ${h(a.pontos.pazFrequencia)} + atritos ${h(a.pontos.atritos)} + faltas ${h(a.pontos.faltas)} + evita ${h(a.pontos.evita)} + prioridade ${h(a.pontos.prioridade)}
-              · Esforço ${a.esforcoLeve ? 'leve' : 'maior'}${a.existe ? ` (${h(rotulo(P.ESTADO, a.estado))})` : ''}</p>
+            <span class="rk-n">${i + 1}</span>
+            <div>
+              <div class="rk-cab"><span class="rk-nome">${h(a.nome)}</span><span class="selo">${h(a.quadranteNome)}</span></div>
+              <p><b>Por quê.</b> ${h(a.porque)}</p>
+              <p class="pontos">Impacto ${h(a.impacto)} = incômodo × uso ${h(a.pontos.pazFrequencia)} + atritos ${h(a.pontos.atritos)} + faltas ${h(a.pontos.faltas)} + evita mostrar ${h(a.pontos.evita)} + prioridade ${h(a.pontos.prioridade)}
+                · Esforço ${a.esforcoLeve ? 'leve' : 'maior'} (${h(rotulo(P.ESTADO, a.estado))})</p>
+            </div>
           </li>`).join('')}
       </ol>
     </section>
     <section class="cartao">
-      <p class="eyebrow">Respostas</p>
+      <p class="rot">Respostas</p>
       <dl class="resp">
         <dt>Quer proposta</dt><dd>${h(rotulo(P.PROPOSTA, r.proposta))}</dd>
         <dt>Quem mora</dt><dd>${h(r.moradores.map((m) => rotulo(P.MORADORES, m)).join(', '))}</dd>
         ${r.ambientes.map((id) => {
           const a = r.porAmbiente[id];
-          return `<dt>${h(P.nomeAmbiente(id))}</dt><dd>Paz: ${h(rotulo(P.PAZ, a.paz))} · Uso: ${h(rotulo(P.FREQ, a.freq))} · ${h(rotulo(P.ESTADO, a.estado))}</dd>`;
+          return `<dt>${h(P.nomeAmbiente(id))}</dt><dd>Incômodo: ${h(rotulo(P.PAZ, a.paz))} · Uso: ${h(rotulo(P.FREQ, a.freq))} · ${h(rotulo(P.ESTADO, a.estado))}</dd>`;
         }).join('')}
         <dt>Atritos da rotina (P8)</dt><dd>${h(r.atritos.map((x) => escolhaTxt(P.ATRITOS, x)).join(' · ') || 'Nenhum')}</dd>
         <dt>O que falta (P9)</dt><dd>${h(r.faltas.map((x) => escolhaTxt(P.FALTAS, x)).join(' · '))}</dd>
@@ -255,7 +300,7 @@ function blocoPublico(titulo, opcoes, valores, nota = '') {
   const total = valores.filter((v) => v != null && v !== '' && !(Array.isArray(v) && !v.length)).length;
   const linhas = contagem(opcoes, valores).filter((l) => l.n);
   return `<section class="cartao">
-    <p class="eyebrow">${h(titulo)}</p>
+    <p class="rot">${h(titulo)}</p>
     ${nota ? `<p class="dica">${h(nota)}</p>` : ''}
     ${linhas.length ? `<div class="barras">${linhas.map((l) => {
       const pct = Math.round((l.n / total) * 100);
@@ -269,13 +314,13 @@ function htmlPublico() {
   const rs = diagnosticos.map((d) => d.respostas || {});
   const res = diagnosticos.map((d) => d.resultado || {});
   if (!rs.length) return '<p class="vazio">Quando chegarem os primeiros diagnósticos, o resumo do seu público aparece aqui.</p>';
-  const saudes = res.map((x) => x.saude).filter((n) => typeof n === 'number');
-  const media = saudes.length ? Math.round(saudes.reduce((a, b) => a + b, 0) / saudes.length) : null;
+  const altos = res.map((x) => x.estado?.impactoAlto).filter((n) => typeof n === 'number');
+  const media = altos.length ? (altos.reduce((a, b) => a + b, 0) / altos.length).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : null;
   const primeiros = res.map((x) => x.ambientes?.[0]?.id);
   return `
     <div class="grade2">
-      <section class="cartao"><p class="eyebrow">Diagnósticos</p><p class="codigo-grande">${diagnosticos.length}</p></section>
-      <section class="cartao"><p class="eyebrow">Saúde média das casas</p><p class="codigo-grande">${media ?? '—'}${media != null ? '<small>/100</small>' : ''}</p></section>
+      <section class="cartao"><p class="rot">Diagnósticos</p><p class="codigo-grande">${diagnosticos.length}</p></section>
+      <section class="cartao"><p class="rot">Ambientes de impacto alto, em média</p><p class="codigo-grande">${media ?? '—'}</p></section>
     </div>
     <p class="dica">Porcentagem sobre quem respondeu cada pergunta. Nas perguntas de várias opções, a soma passa de 100%.</p>
     <div class="grade2">
@@ -283,6 +328,7 @@ function htmlPublico() {
       ${blocoPublico('Acompanha perfis de decoração', P.ACOMPANHA, rs.map((r) => r.acompanha))}
       ${blocoPublico('Onde salva referências', P.REFERENCIAS, rs.map((r) => r.referencias))}
       ${blocoPublico('Ambiente nº 1 do diagnóstico', P.AMBIENTES.map((a) => ({ id: a.id, t: a.nome })), primeiros)}
+      ${blocoPublico('Leitura geral', ['Boa base', 'Pontos específicos', 'Pede uma visão do conjunto'].map((t) => ({ id: t, t })), res.map((x) => x.estado?.nome))}
       ${blocoPublico('Caminho indicado', ['Premier', 'Essence', 'Maison', 'Personalité', 'Collection ou Essence'].map((t) => ({ id: t, t })), res.map((x) => x.caminho?.linha))}
       ${blocoPublico('Quer receber proposta', P.PROPOSTA, rs.map((r) => r.proposta))}
       ${blocoPublico('Quando quer começar', P.INICIO, rs.map((r) => r.inicio))}
@@ -297,7 +343,7 @@ function htmlPublico() {
 function htmlSenhas() {
   const nova = ultimaSenha ? `
     <div class="cartao">
-      <p class="eyebrow">Senha criada</p>
+      <p class="rot">Senha criada</p>
       <p class="codigo-grande">${h(ultimaSenha.codigo)}</p>
       <div class="mensagem">${h(mensagemDirect(ultimaSenha))}</div>
       <button type="button" class="btn" data-copiar-msg="${h(ultimaSenha.id)}">Copiar mensagem para o direct</button>
@@ -307,7 +353,7 @@ function htmlSenhas() {
     ${nova}
     <div class="grade2">
       <form class="cartao" id="f-individual">
-        <p class="eyebrow">Para uma pessoa</p>
+        <p class="rot">Para uma pessoa</p>
         <h2>Senha individual</h2>
         <p class="dica">Vale uma vez. Use quando você responde o direct à mão.</p>
         <div class="linha-form">
@@ -318,7 +364,7 @@ function htmlSenhas() {
         <button class="btn" type="submit">Gerar senha</button>
       </form>
       <form class="cartao" id="f-campanha">
-        <p class="eyebrow">Para a resposta automática</p>
+        <p class="rot">Para a resposta automática</p>
         <h2>Senha da campanha</h2>
         <p class="dica">Uma palavra que todos recebem, por exemplo CASA. Vale para muitas pessoas, até a data que você escolher.</p>
         <div class="linha-form">
@@ -353,16 +399,16 @@ function markdownNotion(d) {
   const r = d.respostas;
   const res = d.resultado;
   const linhas = [
-    `## Diagnóstico da Casa · ${d.nome}`,
+    `## Diagnóstico da casa · ${d.nome}`,
     `Recebido em ${dataHora(d.criado_em)} · ${d.email}${d.instagram ? ' · @' + d.instagram : ''}`,
     '',
-    `**Estado geral:** ${res.estado.nome} (${res.estado.impactoAlto} ambiente(s) de impacto alto)`,
+    `**Leitura geral:** ${res.estado.nome} (${res.estado.impactoAlto} ambiente(s) de impacto alto)`,
     `**Caminho indicado:** ${res.caminho.linha} para ${res.caminho.ambientes.map(P.nomeAmbiente).join(', ') || 'a casa inteira'}`,
     `> ${res.caminho.nota}`,
     '',
     '| # | Ambiente | Quadrante | Impacto | Esforço |',
     '|---|---|---|---|---|',
-    ...res.ambientes.map((a, i) => `| ${i + 1} | ${a.nome}${a.existe ? '' : ' (não existe hoje)'} | ${a.quadrante} · ${a.quadranteNome} | ${a.impacto} | ${a.esforcoLeve ? 'leve' : 'maior'} |`),
+    ...res.ambientes.map((a, i) => `| ${i + 1} | ${a.nome} | ${a.quadrante} · ${a.quadranteNome} | ${a.impacto} | ${a.esforcoLeve ? 'leve' : 'maior'} |`),
     '',
     '**Atritos da rotina (P8)**',
     ...(r.atritos.length ? r.atritos.map((x) => `- ${x.texto || rotulo(P.ATRITOS, x.id)} → ${P.nomeAmbiente(x.amb)}`) : ['- Nenhum']),
@@ -398,11 +444,12 @@ painel.addEventListener('click', async (ev) => {
   }
   switch (b.dataset.acao) {
     case 'recarregar': return recarregar();
+    case 'esqueci': return esqueciSenha();
     case 'voltar': aberto = null; return desenhar();
     case 'copiar-texto': return copiar(textoResultado(d.nome, d.resultado), 'Resultado copiado');
     case 'copiar-notion': return copiar(markdownNotion(d), 'Copiado. Cole na Página do Cliente.');
     case 'email': {
-      const assunto = 'O diagnóstico da sua casa';
+      const assunto = 'Diagnóstico da casa';
       const corpo = `Oi, ${d.nome.split(/\s+/)[0]}!\n\nAqui está o diagnóstico da sua casa.\n\n${textoResultado(d.nome, d.resultado)}`;
       location.href = `mailto:${encodeURIComponent(d.email)}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
       if (d.status === 'novo') await mudarStatus(d, 'respondido');
@@ -463,4 +510,10 @@ async function novaCampanha(f) {
 
 // ---------- Início ----------
 
-if (api.sessaoAtual()) iniciar(); else telaLogin();
+const doLink = api.sessaoDoLink(location.hash);
+if (doLink) {
+  history.replaceState(null, '', location.pathname + location.search);
+  if (doLink.erro) telaLogin('O link expirou ou já foi usado. Peça um novo em "Esqueci a senha".');
+  else telaNovaSenha();
+} else if (api.sessaoAtual()) iniciar();
+else telaLogin();

@@ -72,13 +72,11 @@ Uma palavra que todos recebem (ex.: `CASA`). Ideal para a resposta automática, 
    - Resposta: o texto abaixo.
 
 ```
-Oi! Que bom que você quer olhar para a sua casa com calma.
+Oi! Aqui está a sua senha para o Diagnóstico da casa: CASA
 
-A sua senha para o Diagnóstico da Casa é: CASA
+Abra https://diagnostico.onrender.com e digite a senha. Em cerca de 6 minutos, você responde como usa cada ambiente e recebe a ordem de prioridade da casa, com o motivo de cada posição.
 
-É só abrir https://diagnostico.onrender.com e digitar a senha. Leva cerca de 6 minutos e, no fim, você recebe os seus ambientes em ordem de prioridade e por onde começar.
-
-Qualquer dúvida, é só me chamar aqui.
+Se tiver qualquer dúvida, é só me escrever aqui.
 Gabriele
 ```
 
@@ -110,3 +108,7 @@ Dica: no Instagram, em **Configurações → Ferramentas para criadores → Resp
 - Pesos dos pontos, limite de impacto alto (6) e textos de direção: [`js/diagnostico.js`](js/diagnostico.js).
 - Perguntas e opções: [`js/perguntas.js`](js/perguntas.js).
 - Depois de mudar, rode `npm test` para conferir a matriz.
+
+## Esqueci a senha do painel
+
+Na tela de entrada do painel, digite o seu e-mail e toque em **Esqueci a senha**. Chega um link por e-mail; abra no mesmo aparelho e crie a senha nova.

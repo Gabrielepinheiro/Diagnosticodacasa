@@ -2,7 +2,7 @@
 
 import { CONFIG } from './config.js';
 import * as P from './perguntas.js';
-import { calcular, faixaSaude, negrito } from './diagnostico.js';
+import { calcular, negrito, IMPACTO_ALTO, IMPACTO_BARRA_CHEIA, QUADRANTES } from './diagnostico.js';
 import { verificarSenha, enviarDiagnostico, normalizarSenha, modoDemo } from './api.js';
 
 const RASCUNHO = 'gp-diagnostico-rascunho';
@@ -56,6 +56,8 @@ function passos() {
 }
 
 const linkInstagram = () => (CONFIG.instagram ? `https://ig.me/m/${encodeURIComponent(CONFIG.instagram)}` : '');
+const rot = (n, texto) => `<p class="rot">${n ? `<span class="n">${String(n).padStart(2, '0')}</span>` : ''}${texto}</p>`;
+const ASSINATURA = '<p class="assin">Gabriele Pinheiro<small>Arquiteta brasileira &amp; interior designer</small></p>';
 
 // Botões de escolha (um toque). `multi` usa aria-pressed como caixa de seleção.
 function escolhas(grupo, opcoes, ativo, { multi = false, desativados = [] } = {}) {
@@ -126,52 +128,61 @@ function blocoEscolhaAmbiente(chave, lista) {
 
 const TELAS = {
   senha: {
-    html: () => `
-      <p class="eyebrow">Gabriele Pinheiro · Design de interiores online</p>
-      <h1 tabindex="-1">Diagnóstico da Casa</h1>
-      <p class="lede">Para começar, digite a senha que você recebeu no direct do Instagram.</p>
+    html: () => {
+      const ig = linkInstagram();
+      return `
+      ${rot(0, 'Arquitetura de interiores online')}
+      <h1 tabindex="-1">Diagnóstico da <span class="mao">casa</span></h1>
+      <p class="lede">Em cerca de 6 minutos, você descobre quais ambientes pesam mais na sua rotina e por qual começar, com o motivo de cada posição.</p>
       <form id="f-senha" class="senha" novalidate>
         <label for="codigo">Senha</label>
         <input id="codigo" name="codigo" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${h(st.codigo)}" required>
         <p class="erro" id="erro-senha" role="alert"></p>
         <button class="btn" type="submit">Entrar</button>
       </form>
-      <p class="ajuda">Ainda não tem a senha? Envie <b>${h(CONFIG.palavraChave)}</b> no direct ${CONFIG.instagram
-        ? `de <a href="https://instagram.com/${encodeURIComponent(CONFIG.instagram)}" target="_blank" rel="noopener">@${h(CONFIG.instagram)}</a>`
-        : 'do meu Instagram'} e eu envio a sua.</p>
-      ${modoDemo ? '<p class="aviso">Modo de teste: use a senha <b>DEMO</b>.</p>' : ''}`,
+      <div class="bloco">
+        ${rot(0, 'Ainda não tem a senha?')}
+        <p>Envie <b>${h(CONFIG.palavraChave)}</b> no direct${CONFIG.instagram ? ` de <b>@${h(CONFIG.instagram)}</b>` : ' do Instagram'}. A senha é enviada por lá.</p>
+        ${ig ? `<a class="btn sec-btn" href="${ig}" target="_blank" rel="noopener">Pedir a senha no direct</a>` : ''}
+      </div>
+      ${modoDemo ? '<p class="aviso">Modo de teste: use a senha <b>DEMO</b>.</p>' : ''}`;
+    },
     semContinuar: true,
   },
   abertura: {
     html: () => `
-      <p class="eyebrow">Diagnóstico da Casa</p>
-      <h1 tabindex="-1">Toda casa tem um ambiente que tira a nossa paz.</h1>
-      <p class="lede">Às vezes sabemos qual é; às vezes só sentimos que algo não está bem.</p>
-      <p>Em cerca de 6 minutos, você me conta como se sente na sua casa hoje. No fim, recebe os seus ambientes em ordem de prioridade e uma direção de por onde começar.</p>
-      <p>Se tiver interesse em continuar essa jornada comigo, você também pode pedir uma proposta personalizada. Se não tiver, não tem problema: o seu diagnóstico chega do mesmo jeito.</p>
-      <p class="assinatura">Gabriele Pinheiro</p>`,
+      ${rot(0, 'Diagnóstico da casa')}
+      <h1 tabindex="-1">Por qual ambiente <span class="mao">começar?</span></h1>
+      <p class="lede">Um bom projeto não começa escolhendo móveis. Começa entendendo como eles vão funcionar juntos. Este diagnóstico é o primeiro passo: mostra quais ambientes pesam mais na sua rotina e o que cada um pede.</p>
+      <ol class="etapas">
+        <li><span class="n">01</span><b>Você responde</b><span>Como usa cada ambiente, o que atrapalha a rotina e o que falta na casa. Cerca de 6 minutos.</span></li>
+        <li><span class="n">02</span><b>Cada ambiente é avaliado</b><span>Por dois critérios: o impacto na sua rotina e o esforço para resolver.</span></li>
+        <li><span class="n">03</span><b>Você recebe a ordem</b><span>Os ambientes em ordem de prioridade, com o motivo de cada posição e a direção para cada um.</span></li>
+      </ol>
+      <p class="nota">O diagnóstico é gratuito. Na primeira tela, você escolhe se quer receber também uma proposta. É opcional.</p>
+      ${ASSINATURA}`,
     botao: 'Começar',
     valido: () => true,
   },
   voce: {
     html: () => `
-      <p class="eyebrow">1 · Você</p>
+      ${rot(1, 'Você')}
       <h2 tabindex="-1">Primeiro, um pouco sobre você</h2>
-      <label class="campo">Seu nome<input type="text" data-campo="nome" value="${h(st.r.nome)}" autocomplete="name" maxlength="120"></label>
+      <label class="campo">Nome<input type="text" data-campo="nome" value="${h(st.r.nome)}" autocomplete="name" maxlength="120"></label>
       <label class="campo">E-mail <small>para receber o diagnóstico</small><input type="email" data-campo="email" value="${h(st.r.email)}" autocomplete="email" inputmode="email" maxlength="160"></label>
       <label class="campo">Seu @ no Instagram <small>opcional</small><input type="text" data-campo="instagram" value="${h(st.r.instagram)}" autocapitalize="none" spellcheck="false" maxlength="60" placeholder="@"></label>
       <fieldset><legend>Quem mora na casa com você?</legend>
       ${escolhas('moradores', P.MORADORES, st.r.moradores, { multi: true })}</fieldset>
-      <fieldset><legend>Você gostaria de receber também uma proposta personalizada?</legend>
-        <p class="dica">No fim do questionário, você recebe o seu diagnóstico. Se tiver interesse em continuar essa jornada comigo, posso enviar ao seu e-mail uma proposta personalizada, com um plano de execução para a sua casa. Se não tiver interesse, não tem problema: você recebe o seu diagnóstico do mesmo jeito.</p>
+      <fieldset><legend>Você quer receber também uma proposta personalizada?</legend>
+        <p class="dica">Se quiser seguir com um projeto, envio ao seu e-mail uma proposta com um plano de execução para a casa. É opcional: o diagnóstico chega do mesmo jeito.</p>
         ${escolhas('proposta', P.PROPOSTA, st.r.proposta)}</fieldset>`,
     valido: () => st.r.nome.trim() && emailValido(st.r.email) && st.r.moradores.length && st.r.proposta,
   },
   casa: {
     html: () => `
-      <p class="eyebrow">2 · A sua casa</p>
+      ${rot(2, 'A sua casa')}
       <h2 tabindex="-1">Quais destes ambientes existem na sua casa?</h2>
-      <p class="dica">Marque todos que existem. Em seguida, uma tela rápida para cada um.</p>
+      <p class="dica">Marque todos. Em seguida, uma tela rápida para cada um.</p>
       ${escolhas('ambientes', P.AMBIENTES, st.r.ambientes, { multi: true })}`,
     valido: () => st.r.ambientes.length > 0,
   },
@@ -180,9 +191,9 @@ const TELAS = {
       const a = st.r.porAmbiente[id] || {};
       const n = st.r.ambientes.indexOf(id) + 1;
       return `
-      <p class="eyebrow">Ambiente ${n} de ${st.r.ambientes.length}</p>
+      ${rot(2, `Ambiente ${n} de ${st.r.ambientes.length}`)}
       <h2 tabindex="-1">${h(P.nomeAmbiente(id))}</h2>
-      <fieldset><legend>Quanto este ambiente tira a sua paz hoje?</legend>${escolhas('paz', P.PAZ, a.paz)}</fieldset>
+      <fieldset><legend>Quanto este ambiente te incomoda hoje?</legend>${escolhas('paz', P.PAZ, a.paz)}</fieldset>
       <fieldset><legend>Com que frequência você usa este ambiente?</legend>${escolhas('freq', P.FREQ, a.freq)}</fieldset>
       <fieldset><legend>Como ele está hoje?</legend>${escolhas('estado', P.ESTADO, a.estado)}</fieldset>`;
     },
@@ -190,16 +201,16 @@ const TELAS = {
   },
   atritos: {
     html: () => `
-      <p class="eyebrow">3 · O que atrapalha a sua rotina</p>
-      <h2 tabindex="-1">Se você fosse listar até 3 coisas que atrapalham a sua rotina hoje, quais seriam?</h2>
-      <p class="dica">Até 3 opções.</p>
+      ${rot(3, 'O que atrapalha a rotina')}
+      <h2 tabindex="-1">O que mais atrapalha a sua rotina em casa hoje?</h2>
+      <p class="dica">Até 3 opções. Cada uma conta pontos para o ambiente ligado a ela.</p>
       ${blocoEscolhaAmbiente('atritos', P.ATRITOS)}`,
     valido: () => listaCompleta('atritos', P.ATRITOS),
   },
   faltas: {
     html: () => `
-      <p class="eyebrow">4 · O que falta na sua casa</p>
-      <h2 tabindex="-1">Existe alguma coisa que a sua casa precisa ter, não tem, e isso te atrapalha?</h2>
+      ${rot(4, 'O que falta na casa')}
+      <h2 tabindex="-1">Falta algum espaço que faria diferença na sua rotina?</h2>
       <p class="dica">Até 3 opções.</p>
       ${blocoEscolhaAmbiente('faltas', P.FALTAS)}`,
     valido: () => st.r.faltas.length > 0 && listaCompleta('faltas', P.FALTAS),
@@ -208,7 +219,7 @@ const TELAS = {
     html: () => {
       const meus = st.r.ambientes.map((id) => ({ id, t: P.nomeAmbiente(id) }));
       return `
-      <p class="eyebrow">5 · Como você se sente</p>
+      ${rot(5, 'Prioridades')}
       <h2 tabindex="-1">Duas perguntas rápidas</h2>
       <fieldset><legend>Quais ambientes você evita mostrar quando recebe visitas?</legend>
         <p class="dica">Pode marcar mais de um.</p>
@@ -220,8 +231,8 @@ const TELAS = {
   },
   planos: {
     html: () => `
-      <p class="eyebrow">6 · Os seus planos</p>
-      <h2 tabindex="-1">O momento da casa</h2>
+      ${rot(6, 'O momento da casa')}
+      <h2 tabindex="-1">Os seus planos para a casa</h2>
       <fieldset><legend>O imóvel é próprio ou alugado?</legend>${escolhas('imovel', P.IMOVEL, st.r.imovel)}</fieldset>
       <fieldset><legend>Por quanto tempo você pretende ficar neste imóvel?</legend>${escolhas('tempo', P.TEMPO, st.r.tempo)}</fieldset>
       <fieldset><legend>Você tem vontade de pintar paredes ou colocar papel de parede?</legend>${escolhas('pintura', P.PINTURA, st.r.pintura)}</fieldset>
@@ -230,8 +241,8 @@ const TELAS = {
   },
   decoracao: {
     html: () => `
-      <p class="eyebrow">7 · Você e a decoração</p>
-      <h2 tabindex="-1">Agora, um pouco sobre você e a decoração</h2>
+      ${rot(7, 'Você e a decoração')}
+      <h2 tabindex="-1">Como você costuma decidir</h2>
       <fieldset><legend>O quanto você acompanha perfis de decoração?</legend>${escolhas('acompanha', P.ACOMPANHA, st.r.acompanha)}</fieldset>
       <fieldset><legend>Você costuma salvar referências?</legend>
         <p class="dica">Pode marcar mais de uma.</p>${escolhas('referencias', P.REFERENCIAS, st.r.referencias, { multi: true })}</fieldset>
@@ -241,12 +252,12 @@ const TELAS = {
   },
   momento: {
     html: () => `
-      <p class="eyebrow">8 · Para fechar</p>
+      ${rot(8, 'Para fechar')}
       <h2 tabindex="-1">Última tela</h2>
       <fieldset><legend>Como você conheceu o escritório?</legend>${escolhas('origem', P.ORIGEM, st.r.origem)}
         ${st.r.origem === 'indicacao' ? `<label class="sub">Nome de quem indicou<input type="text" data-campo="indicacao" value="${h(st.r.indicacao)}" maxlength="120"></label>` : ''}</fieldset>
       <label class="consentimento"><input type="checkbox" data-campo="consentimento"${st.r.consentimento ? ' checked' : ''}>
-        <span>Concordo que o escritório GP. guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento.</span></label>
+        <span>Concordo que o escritório Gabriele Pinheiro guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento.</span></label>
       <p class="erro" id="erro-envio" role="alert"></p>`,
     botao: 'Ver o meu diagnóstico',
     valido: () => st.r.origem && st.r.consentimento,
@@ -263,59 +274,122 @@ function listaCompleta(chave, lista) {
   });
 }
 
+const artigo = (id) => P.artigoAmbiente(id);
+const nomeMin = (a) => (a.id === 'keller' ? a.nome : a.nome.charAt(0).toLowerCase() + a.nome.slice(1));
+
+function htmlMatriz(res) {
+  const pos = new Map(res.ambientes.map((a, i) => [a.id, i + 1]));
+  const celula = (q) => {
+    const lista = res.ambientes.filter((a) => a.quadrante === q);
+    const alto = q <= 2 ? ' alto' : '';
+    return `<div class="mx-q${alto}${lista.length ? '' : ' mx-vazio'}">
+      <p class="mx-t">${h(QUADRANTES[q].nome)}</p>
+      ${lista.length
+        ? `<ol>${lista.map((a) => `<li><span class="n">${pos.get(a.id)}</span><a href="#r-${h(a.id)}">${h(a.nome)}</a></li>`).join('')}</ol>`
+        : '<p class="sem">Nenhum ambiente</p>'}
+    </div>`;
+  };
+  return `<div class="matriz" role="group" aria-label="Matriz de impacto na rotina e esforço para resolver">
+    <span></span><span class="mx-x">Esforço leve</span><span class="mx-x">Esforço maior</span>
+    <span class="mx-y">Impacto alto</span>${celula(1)}${celula(2)}
+    <span class="mx-y">Impacto baixo</span>${celula(3)}${celula(4)}
+  </div>`;
+}
+
 function htmlResultado() {
   const res = st.resultado;
   if (!res) return '';
   const primeiroNome = st.r.nome.trim().split(/\s+/)[0];
   const ig = linkInstagram();
-  const ordemCasa = [...res.ambientes].sort((x, y) => st.r.ambientes.indexOf(x.id) - st.r.ambientes.indexOf(y.id) || (x.existe ? 0 : 1) - (y.existe ? 0 : 1));
-  const geral = faixaSaude(res.saude);
+  const total = res.ambientes.length;
+  const altos = res.estado.impactoAlto;
+  const primeiro = res.ambientes[0];
+  const ordemCasa = [...res.ambientes].sort((x, y) => st.r.ambientes.indexOf(x.id) - st.r.ambientes.indexOf(y.id));
+  const resumoAltos = altos === 0 ? 'nenhum tem impacto alto na rotina'
+    : altos === 1 ? '<b>1 tem impacto alto</b> na rotina'
+    : `<b>${altos} têm impacto alto</b> na rotina`;
+  const pts = (n) => `${n} ${n === 1 ? 'ponto' : 'pontos'}`;
   return `
-    <p class="eyebrow">O diagnóstico da sua casa</p>
-    <h1 tabindex="-1">Preparado para ${h(primeiroNome)}</h1>
-    <section class="saude" aria-labelledby="t-saude">
-      <div class="saude-cab">
-        <h2 id="t-saude">Saúde da casa</h2>
-        <p class="saude-nota ${geral.id}"><b>${res.saude}</b>/100</p>
-      </div>
-      <p class="dica">Toque num ambiente para ver o porquê.</p>
-      <div class="saude-grade">
-        ${ordemCasa.map((a) => {
-          const f = faixaSaude(a.saude);
-          return `<a class="comodo ${f.id}" href="#r-${h(a.id)}">
-            <span class="comodo-nome">${h(a.nome)}</span>
-            <span class="comodo-barra" role="img" aria-label="Saúde ${a.saude} de 100"><span style="width:${Math.max(a.saude, 4)}%"></span></span>
-            <small>${a.existe ? f.nome : 'ainda não existe'}</small></a>`;
-        }).join('')}
-      </div>
-    </section>
-    <section class="estado estado-${res.estado.id}">
-      <p class="eyebrow">Estado geral</p>
+    ${rot(0, `Diagnóstico da casa · ${h(primeiroNome)}`)}
+    <h1 tabindex="-1">Por onde <span class="mao">começar</span></h1>
+    <p class="res-resumo">Dos <b>${total} ${total === 1 ? 'ambiente' : 'ambientes'}</b> que você assinalou, ${resumoAltos}. O primeiro da lista é ${artigo(primeiro.id)} <b>${h(nomeMin(primeiro))}</b>.</p>
+
+    <section class="estado">
+      ${rot(0, 'Leitura geral')}
       <p class="estado-nome">${h(res.estado.nome)}</p>
       <p>${h(res.estado.frase)}</p>
     </section>
-    <h2 class="sec">Por onde começar</h2>
-    <ol class="ranking">
-      ${res.ambientes.map((a) => `
-        <li class="q${a.quadrante}" id="r-${h(a.id)}">
-          <div class="rk-cab"><span class="rk-nome">${h(a.nome)}</span><span class="selo">${a.quadrante} · ${h(a.quadranteNome)}</span></div>
-          <p><b>Por quê:</b> ${h(a.porque)}</p>
-          <p><b>Direção:</b> ${h(a.direcao)}</p>
-        </li>`).join('')}
-    </ol>
+
+    <section class="sec" aria-labelledby="t-pesos">
+      ${rot(1, 'Impacto na rotina')}
+      <h2 id="t-pesos">Quanto cada ambiente pesa hoje</h2>
+      <p class="dica">Pontos de impacto de cada ambiente. A partir de ${IMPACTO_ALTO}, o impacto é alto. Toque num ambiente para ver o porquê.</p>
+      <div class="pesos">
+        ${ordemCasa.map((a) => `<a class="peso ${a.faixa}" href="#r-${h(a.id)}">
+            <span class="peso-nome">${h(a.nome)}</span>
+            <span class="peso-barra" role="img" aria-label="${pts(a.impacto)}"><span style="width:${Math.max(3, Math.min(100, Math.round(a.impacto / IMPACTO_BARRA_CHEIA * 100)))}%"></span></span>
+            <small><span>${a.impactoAlto ? 'impacto alto' : a.faixa === 'medio' ? 'impacto médio' : 'impacto baixo'}</span><span class="n">${a.impacto}</span></small>
+          </a>`).join('')}
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="t-matriz">
+      ${rot(2, 'A matriz')}
+      <h2 id="t-matriz">Impacto na rotina × esforço para resolver</h2>
+      <p class="dica">O impacto define a urgência. O esforço mostra o tamanho do trabalho: leve quando os móveis principais já estão no lugar, maior quando faltam móveis ou o ambiente não funciona para a rotina.</p>
+      ${htmlMatriz(res)}
+    </section>
+
+    <section class="sec" aria-labelledby="t-ordem">
+      ${rot(3, 'A ordem')}
+      <h2 id="t-ordem">Ambiente por ambiente</h2>
+      <ol class="ranking">
+        ${res.ambientes.map((a, i) => `
+          <li class="q${a.quadrante}" id="r-${h(a.id)}">
+            <span class="rk-n">${i + 1}</span>
+            <div>
+              <div class="rk-cab"><span class="rk-nome">${h(a.nome)}</span><span class="selo">${h(a.quadranteNome)}</span></div>
+              <p><b>Por quê.</b> ${h(a.porque)}</p>
+              <p><b>Direção.</b> ${h(a.direcao)}</p>
+              <p class="rk-pontos">${pts(a.impacto)} de impacto · esforço ${a.esforcoLeve ? 'leve' : 'maior'}</p>
+            </div>
+          </li>`).join('')}
+      </ol>
+    </section>
+
     <section class="convite">
       <p class="convite-abre">${h(res.convite.abertura)}</p>
       <p>${h(res.convite.texto)}</p>
-      <p>${h(res.convite.fecho)}</p>
-      <p class="eyebrow passo-titulo">O seu próximo passo</p>
-      <p>${negrito(h(res.caminho.frase))}</p>
-      <p class="assinatura">Gabriele Pinheiro</p>
-      <p class="rodape">Design de interiores online</p>
+      <div class="passo">
+        ${rot(0, 'O próximo passo')}
+        <p>${negrito(h(res.caminho.frase))}</p>
+      </div>
+      <p class="citacao">${h(res.convite.fecho)}</p>
+      ${ASSINATURA}
     </section>
+
     <div class="acoes nao-imprimir">
-      ${ig ? `<a class="btn" href="${ig}" target="_blank" rel="noopener">Falar comigo no direct</a>` : ''}
+      ${ig ? `<a class="btn" href="${ig}" target="_blank" rel="noopener">Conversar no direct</a>` : ''}
       <button class="btn sec-btn" type="button" id="imprimir">Salvar em PDF</button>
-    </div>`;
+    </div>
+
+    <details class="metodo">
+      <summary>Como este diagnóstico é calculado</summary>
+      <div class="metodo-corpo">
+        <p>Cada ambiente recebe duas avaliações, a partir das suas respostas.</p>
+        <p><b>Impacto na rotina</b>, em pontos:</p>
+        <ul>
+          <li>o quanto o ambiente incomoda (0 a 3) multiplicado pela frequência de uso (1 a 3);</li>
+          <li>2 pontos para cada atrito ou falta da casa ligado a ele;</li>
+          <li>1 ponto se você evita mostrá-lo a visitas;</li>
+          <li>2 pontos se é o ambiente que você gostaria de ver pronto primeiro.</li>
+        </ul>
+        <p>A partir de ${IMPACTO_ALTO} pontos, o impacto é alto.</p>
+        <p><b>Esforço para resolver</b>: leve quando os móveis principais já estão no lugar ou quando você gosta do ambiente como está; maior quando ele está vazio, tem móveis provisórios ou não funciona para a rotina.</p>
+        <p>A ordem segue a matriz: primeiro os ambientes de impacto alto e esforço leve, depois os de impacto alto e esforço maior, e então os demais. No mesmo quadrante, vem antes o de maior impacto.</p>
+        <p class="nota">O diagnóstico organiza as prioridades. Medidas, estilo e escolhas de cada ambiente são definidos no projeto.</p>
+      </div>
+    </details>`;
 }
 
 // ---------- Desenho ----------

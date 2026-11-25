@@ -85,7 +85,7 @@ test('primeiro no quadrante 2: Maison para os quadrantes 1 e 2, com aviso de Per
 
 test('menos de 2 anos muda a direção do quadrante 2', () => {
   const r = { ambientes: ['cozinha'], porAmbiente: { cozinha: { paz: 3, freq: 3, estado: 'vazio' } } };
-  assert.match(calcular(base({ ...r, tempo: 'menos2' })).ambientes[0].direcao, /vão junto na mudança/);
+  assert.match(calcular(base({ ...r, tempo: 'menos2' })).ambientes[0].direcao, /próxima casa/);
   assert.doesNotMatch(calcular(base({ ...r, tempo: 'mais5' })).ambientes[0].direcao, /mudança/);
 });
 
@@ -104,7 +104,7 @@ test('próximo passo: serviço e ambientes em negrito e frase da proposta confor
   const r = { ambientes: ['estar', 'casal'], porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' }, casal: { paz: 2, freq: 3, estado: 'moveis' } }, prioridade: 'estar' };
   const sim = calcular(base({ ...r, proposta: 'sim' })).caminho.frase;
   assert.match(sim, /^Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é o \*\*Essence\*\* para \*\*sala de estar\*\* e \*\*quarto de casal\*\*\./);
-  assert.match(sim, /receberá no e-mail cadastrado uma proposta personalizada/);
+  assert.match(sim, /recebe no e-mail cadastrado uma proposta personalizada/);
   assert.doesNotMatch(calcular(base({ ...r, proposta: 'nao' })).caminho.frase, /proposta/);
   assert.doesNotMatch(textoResultado('Ana', calcular(base({ ...r, proposta: 'sim' }))), /\*\*/);
 });
@@ -141,18 +141,29 @@ test('"Gosto de como ele está" conta como esforço leve', () => {
   assert.equal(res.ambientes[0].quadrante, 3);
 });
 
-test('saúde: 100 sem impacto, 50 no impacto alto, 0 a partir de 12; média pesa o uso', () => {
+test('faixas de impacto para as barras: baixo até 2, médio de 3 a 5, alto a partir de 6', () => {
   const res = calcular(base({
-    ambientes: ['estar', 'keller'],
-    porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' }, keller: { paz: 0, freq: 1, estado: 'vazio' } },
+    ambientes: ['estar', 'keller', 'cozinha'],
+    porAmbiente: { estar: { paz: 2, freq: 3, estado: 'moveis' }, keller: { paz: 0, freq: 1, estado: 'vazio' }, cozinha: { paz: 1, freq: 3, estado: 'moveis' } },
     prioridade: 'keller',
   }));
-  const s = Object.fromEntries(res.ambientes.map((a) => [a.id, a.saude]));
-  assert.equal(s.estar, 50);  // impacto 6
-  assert.equal(s.keller, 83); // impacto 2
-  assert.equal(res.saude, Math.round((50 * 3 + 83 * 1) / 4));
-  const cheio = calcular(base({ ambientes: ['cozinha'], porAmbiente: { cozinha: { paz: 3, freq: 3, estado: 'vazio' } }, evita: ['cozinha'], prioridade: 'cozinha' }));
-  assert.equal(cheio.ambientes[0].saude, 0);
+  const f = Object.fromEntries(res.ambientes.map((a) => [a.id, [a.impacto, a.faixa]]));
+  assert.deepEqual(f.estar, [6, 'alto']);
+  assert.deepEqual(f.cozinha, [3, 'medio']);
+  assert.deepEqual(f.keller, [2, 'baixo']);
+});
+
+test('textos do resultado seguem o tom do Brand Book (sem linguagem terapêutica)', () => {
+  const amb = ['estar', 'cozinha', 'casal', 'banheiro'];
+  const variações = ['menos2', 'mais5'].flatMap((tempo) => ['sim', 'nao'].map((proposta) => calcular(base({
+    ambientes: amb, tempo, proposta, prioridade: 'estar', evita: ['cozinha'],
+    porAmbiente: { estar: { paz: 3, freq: 3, estado: 'vazio' }, cozinha: { paz: 2, freq: 3, estado: 'moveis' }, casal: { paz: 1, freq: 2, estado: 'gosto' }, banheiro: { paz: 0, freq: 3, estado: 'moveis' } },
+    atritos: [{ id: 'cozinha', amb: 'cozinha' }],
+  }))));
+  const texto = variações.map((r) => textoResultado('Ana', r)).join(' ');
+  for (const proibido of [/\bpaz\b/i, /jornada/i, /sonho/i, /essência/i, /acolh/i, /transforma/i, /não é sobre/i, /sensação de lar/i]) {
+    assert.doesNotMatch(texto, proibido);
+  }
 });
 
 test('convite usa o nome e o artigo do ambiente nº 1', () => {

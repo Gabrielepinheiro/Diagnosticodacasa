@@ -125,6 +125,29 @@ export async function entrar(email, senha) {
   return guardarSessao(d);
 }
 
+/** Envia o e-mail de "esqueci a senha"; o link volta para `voltarPara` com a sessão no endereço. */
+export async function recuperarSenha(email, voltarPara) {
+  if (modoDemo) return;
+  await pedir(`/auth/v1/recover?redirect_to=${encodeURIComponent(voltarPara)}`, { metodo: 'POST', corpo: { email } });
+}
+
+/** Lê a sessão que o Supabase põe no endereço ao abrir o link do e-mail (recuperação ou convite). */
+export function sessaoDoLink(hash) {
+  const q = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+  if (q.get('error') || q.get('error_code')) return { erro: q.get('error_description') || q.get('error') };
+  if (!q.get('access_token') || !['recovery', 'invite', 'signup', 'magiclink'].includes(q.get('type'))) return null;
+  return guardarSessao({
+    access_token: q.get('access_token'),
+    refresh_token: q.get('refresh_token'),
+    expires_in: Number(q.get('expires_in')) || 3600,
+  });
+}
+
+export async function definirSenha(senha) {
+  if (modoDemo) return;
+  await pedir('/auth/v1/user', { metodo: 'PUT', corpo: { password: senha }, token: await token() });
+}
+
 export async function sair() {
   const s = sessaoAtual();
   localStorage.removeItem(SESSAO);

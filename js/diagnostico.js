@@ -4,35 +4,28 @@
 import { ATRITOS, FALTAS, ESTADO, nomeAmbiente, artigoAmbiente } from './perguntas.js';
 
 export const IMPACTO_ALTO = 6;
-
-// Saúde da casa: 100 = o ambiente não pesa nada; cai até 0 quando o impacto chega a 12 pontos.
-// Com o impacto alto (6), a saúde fica em 50.
-export const IMPACTO_SAUDE_ZERO = 12;
-export const FAIXAS_SAUDE = [
-  { id: 'boa', min: 70, nome: 'em paz' },
-  { id: 'media', min: 40, nome: 'pede atenção' },
-  { id: 'baixa', min: 0, nome: 'pede cuidado' },
-];
-export const faixaSaude = (n) => FAIXAS_SAUDE.find((f) => n >= f.min);
-const saudeAmbiente = (impacto) => Math.round(100 * (1 - Math.min(impacto, IMPACTO_SAUDE_ZERO) / IMPACTO_SAUDE_ZERO));
+// Para as barras do resultado: impacto médio a partir de 3 pontos; a barra enche aos 12.
+export const IMPACTO_MEDIO = 3;
+export const IMPACTO_BARRA_CHEIA = 12;
+export const faixaImpacto = (n) => (n >= IMPACTO_ALTO ? 'alto' : n >= IMPACTO_MEDIO ? 'medio' : 'baixo');
 
 export const QUADRANTES = {
-  1: { nome: 'Comece por aqui', direcao: 'Os móveis já estão aqui. Luz, tecidos, arte e objetos certos devolvem a sensação de lar com poucas compras.' },
-  2: { nome: 'O coração do projeto', direcao: 'Este ambiente pede um layout pensado para a sua rotina antes de qualquer compra. Comprar sem esse plano é o caminho mais caro.' },
-  3: { nome: 'Toques finais', direcao: 'Quando o essencial estiver resolvido, alguns detalhes completam este ambiente. Não há pressa.' },
-  4: { nome: 'Pode esperar', direcao: 'Hoje ele não pesa na sua rotina. Guarde para uma segunda etapa e concentre a energia nos primeiros da lista.' },
+  1: { nome: 'Comece por aqui', direcao: 'Os móveis principais já estão no lugar. Iluminação, tecidos, arte e objetos resolvem a maior parte do que incomoda, com poucas compras e sem obra.' },
+  2: { nome: 'O coração do projeto', direcao: 'Este ambiente pede um layout pensado para a rotina antes de qualquer compra: medidas, circulação e a posição de cada móvel. Comprar sem esse plano costuma sair mais caro.' },
+  3: { nome: 'Toques finais', direcao: 'Funciona bem hoje. Quando os primeiros da lista estiverem resolvidos, alguns detalhes completam o ambiente.' },
+  4: { nome: 'Pode esperar', direcao: 'Hoje ele pesa pouco na rotina. Vale deixar para uma segunda etapa e concentrar as decisões nos primeiros da lista.' },
 };
 
-const DIRECAO_2_CURTO_PRAZO = 'Este ambiente pede um layout pensado para a sua rotina antes de qualquer compra. Como você pretende ficar menos de 2 anos neste imóvel, a escolha vai para soluções que vão junto na mudança.';
+const DIRECAO_2_CURTO_PRAZO = 'Este ambiente pede um layout pensado para a rotina antes de qualquer compra. Como você pretende ficar menos de 2 anos neste imóvel, a prioridade são peças que funcionem também na próxima casa.';
 
 export const ESTADOS = {
-  paz: { nome: 'Em paz', frase: 'A sua casa já tem uma boa base. O que falta são toques que trazem ainda mais de você para ela.' },
-  atencao: { nome: 'Pede atenção', frase: 'Há pontos específicos tirando a sua paz. Resolvendo esses ambientes, a casa inteira muda de sensação.' },
-  cuidado: { nome: 'Pede cuidado', frase: 'Vários ambientes pesam na sua rotina ao mesmo tempo. Antes de comprar qualquer coisa, vale ter uma estratégia para a casa inteira.' },
+  paz: { nome: 'Boa base', frase: 'Nenhum ambiente tem impacto alto na rotina. A casa já funciona; o que falta são escolhas que tragam mais personalidade a cada ambiente.' },
+  atencao: { nome: 'Pontos específicos', frase: 'Poucos ambientes concentram o que pesa na rotina. Resolver esses primeiro muda o funcionamento da casa como um todo.' },
+  cuidado: { nome: 'Pede uma visão do conjunto', frase: 'Vários ambientes pesam na rotina ao mesmo tempo. Antes de comprar qualquer peça, vale definir como eles vão funcionar juntos.' },
 };
 
 const FREQ_TXT = { 3: 'todos os dias', 2: 'algumas vezes por semana', 1: 'raramente' };
-const PAZ_TXT = { 1: 'um pouco', 2: 'bastante' };
+const INCOMODO_TXT = { 1: 'um pouco', 2: 'bastante' };
 
 const minuscula = (t) => t.charAt(0).toLowerCase() + t.slice(1);
 
@@ -50,13 +43,12 @@ function montarPorque(a, tempo) {
   const partes = [];
   if (a.existe && a.paz > 0) {
     partes.push(a.paz === 3
-      ? `Você usa este ambiente ${FREQ_TXT[a.freq]} e ele é o que mais tira a sua paz.`
-      : `Você usa este ambiente ${FREQ_TXT[a.freq]} e ele tira ${PAZ_TXT[a.paz]} a sua paz.`);
+      ? `Você usa este ambiente ${FREQ_TXT[a.freq]} e ele é o que mais te incomoda.`
+      : `Você usa este ambiente ${FREQ_TXT[a.freq]} e ele te incomoda ${INCOMODO_TXT[a.paz]}.`);
   }
-  if (!a.existe) partes.push('Ele ainda não existe na sua casa, mas faz falta.');
-  if (a.atritos.length === 1) partes.push(`É aqui que mora um dos atritos da sua rotina: ${minuscula(a.atritos[0])}.`);
-  if (a.atritos.length > 1) partes.push(`É aqui que moram atritos da sua rotina: ${juntar(a.atritos.map(minuscula))}.`);
-  if (a.faltas.length) partes.push(`É o que falta na sua casa hoje: ${juntar(a.faltas.map(minuscula))}.`);
+  if (a.atritos.length === 1) partes.push(`Está ligado a um atrito que você apontou: ${minuscula(a.atritos[0])}.`);
+  if (a.atritos.length > 1) partes.push(`Está ligado a atritos que você apontou: ${juntar(a.atritos.map(minuscula))}.`);
+  if (a.faltas.length) partes.push(`Você apontou que falta ${juntar(a.faltas.map(minuscula))}.`);
   if (a.prioridade) partes.push('É o ambiente que você gostaria de ver pronto primeiro.');
   if (a.evita) partes.push('É o ambiente que você evita mostrar quando recebe visitas.');
   if (!partes.length) partes.push(a.paz === 0 ? 'Você gosta dele como está, e ele pesa pouco na sua rotina.' : 'Hoje ele pesa pouco na sua rotina.');
@@ -70,8 +62,8 @@ function listaNomes(ids) {
 }
 
 const PROPOSTA_TXT = {
-  sim: 'Em até 2 dias úteis, você receberá no e-mail cadastrado uma proposta personalizada, com um plano de execução para a sua casa.',
-  nao: 'Se quiser seguir comigo depois, é só me chamar no direct.',
+  sim: 'Em até 2 dias úteis, você recebe no e-mail cadastrado uma proposta personalizada, com um plano de execução para a casa.',
+  nao: 'Se quiser seguir com um projeto depois, é só me escrever no direct.',
 };
 
 function montarCaminho(estadoId, ambientes, r) {
@@ -89,7 +81,7 @@ function escolherCaminho(estadoId, ambientes, r) {
     return {
       linha: 'Premier',
       ambientes: ids,
-      frase: 'Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é a **Premier**, uma call para montar a estratégia da casa inteira.',
+      frase: 'Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é a **Premier**, uma conversa de 1h30 para definir a estratégia da casa inteira: prioridades, ordem das compras e o que cada ambiente precisa.',
       nota: '3 ou mais ambientes de impacto alto: Premier.',
     };
   }
@@ -99,7 +91,7 @@ function escolherCaminho(estadoId, ambientes, r) {
       linha: 'Collection ou Essence',
       ambientes: ids,
       frase: `Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é a **Collection** ou o **Essence** para ${listaNomes(ids)}, conforme o quanto de acompanhamento você quer.`,
-      nota: 'Casa em paz: Collection ou Essence, conforme o acompanhamento desejado.',
+      nota: 'Boa base (nenhum ambiente de impacto alto): Collection ou Essence, conforme o acompanhamento desejado.',
     };
   }
   if (primeiro.quadrante === 1) {
@@ -137,11 +129,13 @@ function escolherCaminho(estadoId, ambientes, r) {
 }
 
 const CONVITE = {
-  1: 'Você já usa muito este ambiente e, com poucos ajustes, ele pode mudar a forma como você se sente em casa já nas próximas semanas.',
-  2: 'É ali que está a maior transformação da sua casa. Quando ele estiver resolvido, a rotina inteira fica mais leve.',
-  3: 'A sua casa já tem uma boa base. Começar por aqui é o jeito de trazer ainda mais de você para ela, com calma.',
-  4: 'A sua casa já tem uma boa base. Começar por aqui é o jeito de trazer ainda mais de você para ela, com calma.',
+  1: 'É um ambiente que você usa muito e que já tem a base de móveis. Por isso é o que mais rende: muda o uso de todos os dias com poucas decisões.',
+  2: 'É o ambiente que mais pesa na sua rotina e o que pede mais decisões de uma vez: layout, medidas e compras. Começar por ele, com um plano, evita compras que depois não conversam entre si.',
+  3: 'Nenhum ambiente pesa muito na sua rotina hoje. Começar por aqui é a forma de acrescentar personalidade à casa, sem pressa.',
+  4: 'Nenhum ambiente pesa muito na sua rotina hoje. Começar por aqui é a forma de acrescentar personalidade à casa, sem pressa.',
 };
+// A filosofia de projeto do escritório (Brand Book, "Nossas três frases").
+export const FILOSOFIA = 'Um bom projeto não começa escolhendo móveis. Começa entendendo como eles vão funcionar juntos.';
 
 function montarConvite(nome, primeiro) {
   const n = primeiro.id === 'keller' ? primeiro.nome : minuscula(primeiro.nome);
@@ -150,7 +144,7 @@ function montarConvite(nome, primeiro) {
   return {
     abertura: `${primeiroNome ? primeiroNome + ', pelo' : 'Pelo'} que você me contou, eu sugiro que você comece ${pelo} ${n}.`,
     texto: CONVITE[primeiro.quadrante],
-    fecho: 'Uma casa não fica pronta de uma vez. Ela vai ficando sua, um ambiente de cada vez.',
+    fecho: FILOSOFIA,
   };
 }
 
@@ -200,7 +194,7 @@ export function calcular(r) {
     a.quadranteNome = QUADRANTES[a.quadrante].nome;
     a.direcao = a.quadrante === 2 && r.tempo === 'menos2' ? DIRECAO_2_CURTO_PRAZO : QUADRANTES[a.quadrante].direcao;
     a.porque = montarPorque(a, r.tempo);
-    a.saude = saudeAmbiente(a.impacto);
+    a.faixa = faixaImpacto(a.impacto);
     return a;
   });
 
@@ -215,13 +209,8 @@ export function calcular(r) {
   const altos = ambientes.filter((a) => a.impactoAlto).length;
   const estadoId = altos === 0 ? 'paz' : altos <= 2 ? 'atencao' : 'cuidado';
 
-  // Saúde geral: média ponderada pelo uso; quem não existe ainda pesa como "raramente".
-  const peso = (a) => (a.existe ? a.freq : 1);
-  const saude = Math.round(ambientes.reduce((s, a) => s + a.saude * peso(a), 0) / ambientes.reduce((s, a) => s + peso(a), 0));
-
   return {
-    versao: 2,
-    saude,
+    versao: 3,
     estado: { id: estadoId, ...ESTADOS[estadoId], impactoAlto: altos },
     ambientes,
     convite: montarConvite(r.nome, ambientes[0]),
@@ -240,10 +229,11 @@ export function textoResultado(nome, res) {
     'O DIAGNÓSTICO DA SUA CASA',
     `Preparado para ${nome}`,
     '',
-    res.saude != null ? `SAÚDE DA CASA: ${res.saude}/100 · ${res.estado.nome}` : `ESTADO GERAL: ${res.estado.nome}`,
+    `LEITURA GERAL: ${res.estado.nome}`,
     res.estado.frase,
     '',
-    ...[...res.ambientes].filter((a) => a.saude != null).sort((x, y) => x.saude - y.saude).map((a) => `   ${a.nome}: ${a.saude}/100 · ${faixaSaude(a.saude).nome}`),
+    'IMPACTO DE CADA AMBIENTE NA ROTINA (a partir de 6 pontos, o impacto é alto)',
+    ...res.ambientes.map((a) => `   ${a.nome}: ${a.impacto} ${a.impacto === 1 ? 'ponto' : 'pontos'}`),
     '',
     'POR ONDE COMEÇAR',
     '',
@@ -254,7 +244,7 @@ export function textoResultado(nome, res) {
     linhas.push(`   Direção: ${a.direcao}`);
     linhas.push('');
   });
-  if (res.convite) linhas.push('POR ONDE EU COMEÇARIA', `${res.convite.abertura} ${res.convite.texto}`, res.convite.fecho, '');
-  linhas.push('O SEU PRÓXIMO PASSO', semMarcas(res.caminho.frase), '', 'Gabriele Pinheiro · Design de interiores online');
+  if (res.convite) linhas.push('POR ONDE EU COMEÇARIA', `${res.convite.abertura} ${res.convite.texto}`, '');
+  linhas.push('O SEU PRÓXIMO PASSO', semMarcas(res.caminho.frase), '', 'Gabriele Pinheiro · Arquiteta e interior designer');
   return linhas.join('\n');
 }
