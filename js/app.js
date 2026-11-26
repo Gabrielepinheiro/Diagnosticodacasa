@@ -126,42 +126,79 @@ function blocoEscolhaAmbiente(chave, lista) {
   return html;
 }
 
+// Capa: a primeira impressão. Foto, título, o que a pessoa recebe e um exemplo do resultado.
+const AMBIENTES_FAIXA = ['Hall de entrada', 'Sala de estar', 'Sala de jantar', 'Cozinha', 'Quarto de casal', 'Quarto infantil', 'Home office', 'Banheiro', 'Lavanderia', 'Varanda'];
+const SELO = `<svg class="selo-giro" viewBox="0 0 120 120" aria-hidden="true">
+  <defs><path id="circ" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs>
+  <circle cx="60" cy="60" r="58" fill="#fff"/>
+  <text><textPath href="#circ" startOffset="0">DIAGNÓSTICO DA CASA · CERCA DE 6 MINUTOS ·</textPath></text>
+  <circle cx="60" cy="60" r="4" fill="#773131"/></svg>`;
+
+function capa(acao) {
+  const faixa = [...AMBIENTES_FAIXA, ...AMBIENTES_FAIXA].map((t) => `<span>${t}</span>`).join('');
+  return `
+  <section class="capa">
+    <div class="capa-texto">
+      ${rot(0, 'Arquitetura de interiores online')}
+      <h1 tabindex="-1">Por qual ambiente <span class="mao">começar?</span></h1>
+      <p class="lede">Em cerca de 6 minutos, você descobre quais ambientes pesam mais na sua rotina e em que ordem resolver a casa, com o motivo de cada posição.</p>
+      <div class="capa-acao">${acao}</div>
+    </div>
+    <figure class="capa-foto">
+      <div class="moldura"><picture><source srcset="img/gabriele.webp" type="image/webp"><img src="img/gabriele.jpg" width="720" height="900" alt="Gabriele Pinheiro, arquiteta"></picture><p class="bilhete" aria-hidden="true">pensado para a sua rotina</p></div>
+      ${SELO}
+      
+    </figure>
+  </section>
+  <div class="faixa sangra" aria-hidden="true"><div class="faixa-trilho">${faixa}</div></div>
+  <section class="recebe">
+    ${rot(0, 'O que você recebe')}
+    <ol class="lista-num">
+      <li><span class="n">01</span><div><b>O peso de cada ambiente</b><p>Quanto cada um interfere na sua rotina hoje, em pontos.</p></div></li>
+      <li><span class="n">02</span><div><b>A ordem para começar</b><p>Os ambientes organizados por impacto e esforço, com o motivo de cada posição.</p></div></li>
+      <li><span class="n">03</span><div><b>O próximo passo</b><p>A direção para cada ambiente e o serviço que mais combina com o seu momento.</p></div></li>
+    </ol>
+  </section>
+  <section class="amostra" aria-label="Exemplo de resultado">
+    <p class="amostra-nota mao">um exemplo</p>
+    <div class="amostra-folha">
+      <p class="rot">Quanto cada ambiente pesa hoje</p>
+      <div class="am-linha"><span>Sala de jantar</span><i style="--w:92%" class="alto"></i><small>Impacto alto</small></div>
+      <div class="am-linha"><span>Hall de entrada</span><i style="--w:70%" class="alto"></i><small>Impacto alto</small></div>
+      <div class="am-linha"><span>Home office</span><i style="--w:42%" class="medio"></i><small>Impacto médio</small></div>
+      <div class="am-linha"><span>Cozinha</span><i style="--w:18%"></i><small>Impacto baixo</small></div>
+      <p class="am-fim">Comece pela <b>sala de jantar</b>.</p>
+    </div>
+  </section>
+  <blockquote class="frase sangra"><p>Um bom projeto não começa escolhendo móveis. Começa entendendo como eles vão funcionar <span class="mao">juntos.</span></p></blockquote>
+  <section class="quem">
+    ${rot(0, 'Quem conduz')}
+    ${ASSINATURA}
+  </section>`;
+}
+
 const TELAS = {
   senha: {
     html: () => {
       const ig = linkInstagram();
-      return `
-      ${rot(0, 'Arquitetura de interiores online')}
-      <h1 tabindex="-1">Diagnóstico da <span class="mao">casa</span></h1>
-      <p class="lede">Em cerca de 6 minutos, você descobre quais ambientes pesam mais na sua rotina e por qual começar, com o motivo de cada posição.</p>
+      return capa(`
       <form id="f-senha" class="senha" novalidate>
         <label for="codigo">Senha</label>
         <input id="codigo" name="codigo" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${h(st.codigo)}" required>
         <p class="erro" id="erro-senha" role="alert"></p>
         <button class="btn" type="submit">Entrar</button>
       </form>
-      <div class="bloco">
-        ${rot(0, 'Ainda não tem a senha?')}
-        <p>Envie <b>${h(CONFIG.palavraChave)}</b> no direct${CONFIG.instagram ? ` de <b>@${h(CONFIG.instagram)}</b>` : ' do Instagram'}. A senha é enviada por lá.</p>
-        ${ig ? `<a class="btn sec-btn" href="${ig}" target="_blank" rel="noopener">Pedir a senha no direct</a>` : ''}
-      </div>
-      ${modoDemo ? '<p class="aviso">Modo de teste: use a senha <b>DEMO</b>.</p>' : ''}`;
+      <p class="sem-senha">Ainda não tem a senha? Envie <b>${h(CONFIG.palavraChave)}</b> no direct${CONFIG.instagram ? ` de ${ig ? `<a href="${ig}" target="_blank" rel="noopener">@${h(CONFIG.instagram)}</a>` : `@${h(CONFIG.instagram)}`}` : ' do Instagram'}.</p>
+      ${modoDemo ? '<p class="aviso">Modo de teste: use a senha <b>DEMO</b>.</p>' : ''}`);
     },
     semContinuar: true,
   },
   abertura: {
-    html: () => `
-      ${rot(0, 'Diagnóstico da casa')}
-      <h1 tabindex="-1">Por qual ambiente <span class="mao">começar?</span></h1>
-      <p class="lede">Um bom projeto não começa escolhendo móveis. Começa entendendo como eles vão funcionar juntos. Este diagnóstico é o primeiro passo: mostra quais ambientes pesam mais na sua rotina e o que cada um pede.</p>
-      <ol class="etapas">
-        <li><span class="n">01</span><b>Você responde</b><span>Como usa cada ambiente, o que atrapalha a rotina e o que falta na casa. Cerca de 6 minutos.</span></li>
-        <li><span class="n">02</span><b>Cada ambiente é avaliado</b><span>Por dois critérios: o impacto na sua rotina e o esforço para resolver.</span></li>
-        <li><span class="n">03</span><b>Você recebe a ordem</b><span>Os ambientes em ordem de prioridade, com o motivo de cada posição e a direção para cada um.</span></li>
-      </ol>
-      <p class="nota">O diagnóstico é gratuito. Na primeira tela, você escolhe se quer receber também uma proposta. É opcional.</p>
-      ${ASSINATURA}`,
-    botao: 'Começar',
+    html: () => capa(`
+      <button type="button" class="btn" data-acao="comecar">Começar o diagnóstico</button>
+      <p class="nota">Gratuito. Você escolhe no início se quer receber também uma proposta.</p>`) + `
+      <div class="fim-capa"><button type="button" class="btn" data-acao="comecar">Começar o diagnóstico</button></div>`,
+    semContinuar: true,
     valido: () => true,
   },
   voce: {
@@ -441,6 +478,9 @@ function irPara(passo) {
   st.passo = passo;
   salvar();
   render();
+  // Animação de entrada só na troca de tela (não a cada toque numa opção).
+  app.classList.remove('entra'); void app.offsetWidth; app.classList.add('entra');
+  clearTimeout(irPara.t); irPara.t = setTimeout(() => app.classList.remove('entra'), 600);
   window.scrollTo({ top: 0 });
   app.querySelector('[tabindex="-1"]')?.focus({ preventScroll: true });
 }
@@ -512,6 +552,7 @@ app.addEventListener('click', (ev) => {
   const b = ev.target.closest('button');
   if (!b || b.disabled) return;
   if (b.dataset.grupo) return escolher(b.dataset.grupo, b.dataset.v);
+  if (b.dataset.acao === 'comecar') return avancar();
   if (b.id === 'voltar') {
     const lista = passos();
     return irPara(lista[Math.max(1, lista.indexOf(st.passo) - 1)]);
