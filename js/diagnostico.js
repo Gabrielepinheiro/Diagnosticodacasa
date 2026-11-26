@@ -245,6 +245,6 @@ export function textoResultado(nome, res) {
     linhas.push('');
   });
   if (res.convite) linhas.push('POR ONDE EU COMEÇARIA', `${res.convite.abertura} ${res.convite.texto}`, '');
-  linhas.push('O SEU PRÓXIMO PASSO', semMarcas(res.caminho.frase), '', 'Gabriele Pinheiro · Arquiteta e interior designer');
+  linhas.push('O SEU PRÓXIMO PASSO', semMarcas(res.caminho.frase), '', 'Gabriele Pinheiro · Interior designer');
   return linhas.join('\n');
 }

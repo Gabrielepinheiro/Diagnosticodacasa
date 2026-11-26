@@ -57,7 +57,7 @@ function passos() {
 
 const linkInstagram = () => (CONFIG.instagram ? `https://ig.me/m/${encodeURIComponent(CONFIG.instagram)}` : '');
 const rot = (n, texto) => `<p class="rot">${n ? `<span class="n">${String(n).padStart(2, '0')}</span>` : ''}${texto}</p>`;
-const ASSINATURA = '<p class="assin">Gabriele Pinheiro<small>Arquiteta brasileira &amp; interior designer</small></p>';
+const ASSINATURA = '<p class="assin">Gabriele Pinheiro<small>Interior designer</small></p>';
 
 // Botões de escolha (um toque). `multi` usa aria-pressed como caixa de seleção.
 function escolhas(grupo, opcoes, ativo, { multi = false, desativados = [] } = {}) {
@@ -131,7 +131,7 @@ function capa(acao) {
   return `
   <section class="capa">
     <div class="capa-titulo">
-      ${rot(0, 'Arquitetura de interiores online')}
+      ${rot(0, 'Design de interiores online')}
       <h1 tabindex="-1"><span class="h-leve">Por qual</span> <em>ambiente</em> <span class="mao">começar?</span></h1>
     </div>
     <div class="capa-texto">
@@ -284,7 +284,7 @@ const TELAS = {
       <fieldset><legend>Como você conheceu o escritório?</legend>${escolhas('origem', P.ORIGEM, st.r.origem)}
         ${st.r.origem === 'indicacao' ? `<label class="sub">Nome de quem indicou<input type="text" data-campo="indicacao" value="${h(st.r.indicacao)}" maxlength="120"></label>` : ''}</fieldset>
       <label class="consentimento"><input type="checkbox" data-campo="consentimento"${st.r.consentimento ? ' checked' : ''}>
-        <span>Concordo que o escritório Gabriele Pinheiro guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento.</span></label>
+        <span>Concordo que o escritório Gabriele Pinheiro guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento. Detalhes na <a href="https://www.gabrielepinheiro.com/datenschutz" target="_blank" rel="noopener">política de privacidade</a>.</span></label>
       <p class="erro" id="erro-envio" role="alert"></p>`,
     botao: 'Ver o meu diagnóstico',
     valido: () => st.r.origem && st.r.consentimento,
