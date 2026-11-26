@@ -284,7 +284,7 @@ const TELAS = {
       <fieldset><legend>Como você conheceu o escritório?</legend>${escolhas('origem', P.ORIGEM, st.r.origem)}
         ${st.r.origem === 'indicacao' ? `<label class="sub">Nome de quem indicou<input type="text" data-campo="indicacao" value="${h(st.r.indicacao)}" maxlength="120"></label>` : ''}</fieldset>
       <label class="consentimento"><input type="checkbox" data-campo="consentimento"${st.r.consentimento ? ' checked' : ''}>
-        <span>Concordo que o escritório Gabriele Pinheiro guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento. Detalhes na <a href="https://www.gabrielepinheiro.com/datenschutz" target="_blank" rel="noopener">política de privacidade</a>.</span></label>
+        <span>Concordo que o escritório Gabriele Pinheiro guarde estas respostas para preparar o meu diagnóstico e entrar em contato comigo. Posso pedir a exclusão a qualquer momento. Detalhes na <a href="https://www.gabrielepinheiro.com/datenschutz.html" target="_blank" rel="noopener">política de privacidade</a>.</span></label>
       <p class="erro" id="erro-envio" role="alert"></p>`,
     botao: 'Ver o meu diagnóstico',
     valido: () => st.r.origem && st.r.consentimento,
