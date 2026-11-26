@@ -140,8 +140,8 @@ function capa(acao) {
   <section class="capa">
     <div class="capa-texto">
       ${rot(0, 'Arquitetura de interiores online')}
-      <h1 tabindex="-1">Por qual ambiente <span class="mao">começar?</span></h1>
-      <p class="lede">Em cerca de 6 minutos, você descobre quais ambientes pesam mais na sua rotina e em que ordem resolver a casa, com o motivo de cada posição.</p>
+      <h1 tabindex="-1"><span class="h-leve">Por qual</span> <em>ambiente</em> <span class="mao">começar?</span></h1>
+      <p class="lede">Em <b>cerca de 6 minutos</b>, você descobre <b>quais ambientes pesam mais</b> na sua rotina e <b>em que ordem resolver a casa</b>, com o motivo de cada posição.</p>
       <div class="capa-acao">${acao}</div>
     </div>
     <figure class="capa-foto">
@@ -154,9 +154,9 @@ function capa(acao) {
   <section class="recebe">
     ${rot(0, 'O que você recebe')}
     <ol class="lista-num">
-      <li><span class="n">01</span><div><b>O peso de cada ambiente</b><p>Quanto cada um interfere na sua rotina hoje, em pontos.</p></div></li>
-      <li><span class="n">02</span><div><b>A ordem para começar</b><p>Os ambientes organizados por impacto e esforço, com o motivo de cada posição.</p></div></li>
-      <li><span class="n">03</span><div><b>O próximo passo</b><p>A direção para cada ambiente e o serviço que mais combina com o seu momento.</p></div></li>
+      <li><span class="n">01</span><div><b>O peso <em>de cada ambiente</em></b><p>Quanto cada um <strong>interfere na sua rotina</strong> hoje, em pontos.</p></div></li>
+      <li><span class="n">02</span><div><b>A ordem <em>para começar</em></b><p>Os ambientes organizados por <strong>impacto e esforço</strong>, com o motivo de cada posição.</p></div></li>
+      <li><span class="n">03</span><div><b>O próximo <em>passo</em></b><p>A direção para cada ambiente e <strong>o serviço que mais combina</strong> com o seu momento.</p></div></li>
     </ol>
   </section>
   <section class="amostra" aria-label="Exemplo de resultado">
@@ -167,10 +167,10 @@ function capa(acao) {
       <div class="am-linha"><span>Hall de entrada</span><i style="--w:70%" class="alto"></i><small>Impacto alto</small></div>
       <div class="am-linha"><span>Home office</span><i style="--w:42%" class="medio"></i><small>Impacto médio</small></div>
       <div class="am-linha"><span>Cozinha</span><i style="--w:18%"></i><small>Impacto baixo</small></div>
-      <p class="am-fim">Comece pela <b>sala de jantar</b>.</p>
+      <p class="am-fim"><span>Comece pela</span> <b>sala de jantar</b></p>
     </div>
   </section>
-  <blockquote class="frase sangra"><p>Um bom projeto não começa escolhendo móveis. Começa entendendo como eles vão funcionar <span class="mao">juntos.</span></p></blockquote>
+  <blockquote class="frase sangra"><p>Um bom projeto <strong>não começa escolhendo móveis.</strong> Começa entendendo como eles vão funcionar <span class="mao">juntos.</span></p></blockquote>
   <section class="quem">
     ${rot(0, 'Quem conduz')}
     ${ASSINATURA}
