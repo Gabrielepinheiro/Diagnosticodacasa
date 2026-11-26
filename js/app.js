@@ -126,43 +126,33 @@ function blocoEscolhaAmbiente(chave, lista) {
   return html;
 }
 
-// Capa: a primeira impressão. Foto, título, o que a pessoa recebe e um exemplo do resultado.
-const AMBIENTES_FAIXA = ['Hall de entrada', 'Sala de estar', 'Sala de jantar', 'Cozinha', 'Quarto de casal', 'Quarto infantil', 'Home office', 'Banheiro', 'Lavanderia', 'Varanda'];
-const SELO = `<svg class="selo-giro" viewBox="0 0 120 120" aria-hidden="true">
-  <defs><path id="circ" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs>
-  <circle cx="60" cy="60" r="58" fill="#fff"/>
-  <text><textPath href="#circ" startOffset="0">DIAGNÓSTICO DA CASA · CERCA DE 6 MINUTOS ·</textPath></text>
-  <circle cx="60" cy="60" r="4" fill="#773131"/></svg>`;
-
+// Capa: a primeira impressão. Título, o que a pessoa recebe, um exemplo do resultado e a frase do Brand Book.
 function capa(acao) {
-  const faixa = [...AMBIENTES_FAIXA, ...AMBIENTES_FAIXA].map((t) => `<span>${t}</span>`).join('');
   return `
   <section class="capa">
-    <div class="capa-texto">
+    <div class="capa-titulo">
       ${rot(0, 'Arquitetura de interiores online')}
       <h1 tabindex="-1"><span class="h-leve">Por qual</span> <em>ambiente</em> <span class="mao">começar?</span></h1>
+    </div>
+    <div class="capa-texto">
       <p class="lede">Em <b>cerca de 6 minutos</b>, você descobre <b>quais ambientes pesam mais</b> na sua rotina e <b>em que ordem resolver a casa</b>, com o motivo de cada posição.</p>
       <div class="capa-acao">${acao}</div>
     </div>
-    <figure class="capa-foto">
-      <div class="moldura"><picture><source srcset="img/gabriele.webp" type="image/webp"><img src="img/gabriele.jpg" width="720" height="900" alt="Gabriele Pinheiro, arquiteta"></picture><p class="bilhete" aria-hidden="true">pensado para a sua rotina</p></div>
-      ${SELO}
-      
-    </figure>
   </section>
-  <div class="faixa sangra" aria-hidden="true"><div class="faixa-trilho">${faixa}</div></div>
-  <section class="recebe">
-    ${rot(0, 'O que você recebe')}
-    <ol class="lista-num">
-      <li><span class="n">01</span><div><b>O peso <em>de cada ambiente</em></b><p>Quanto cada um <strong>interfere na sua rotina</strong> hoje, em pontos.</p></div></li>
-      <li><span class="n">02</span><div><b>A ordem <em>para começar</em></b><p>Os ambientes organizados por <strong>impacto e esforço</strong>, com o motivo de cada posição.</p></div></li>
-      <li><span class="n">03</span><div><b>O próximo <em>passo</em></b><p>A direção para cada ambiente e <strong>o serviço que mais combina</strong> com o seu momento.</p></div></li>
-    </ol>
+  <section class="bordo sangra recebe">
+    <div class="miolo">
+      ${rot(0, 'O que você recebe')}
+      <ol class="lista-num">
+        <li><span class="n">01</span><div><b>O peso <em>de cada ambiente</em></b><p>Quanto cada um <strong>interfere na sua rotina</strong> hoje, em pontos.</p></div></li>
+        <li><span class="n">02</span><div><b>A ordem <em>para começar</em></b><p>Os ambientes organizados por <strong>impacto e esforço</strong>, com o motivo de cada posição.</p></div></li>
+        <li><span class="n">03</span><div><b>O próximo <em>passo</em></b><p>A direção para cada ambiente e <strong>o serviço que mais combina</strong> com o seu momento.</p></div></li>
+      </ol>
+    </div>
   </section>
   <section class="amostra" aria-label="Exemplo de resultado">
-    <p class="amostra-nota mao">um exemplo</p>
+    ${rot(0, 'Exemplo de resultado')}
     <div class="amostra-folha">
-      <p class="rot">Quanto cada ambiente pesa hoje</p>
+      <p class="am-tit">Quanto cada ambiente <em>pesa hoje</em></p>
       <div class="am-linha"><span>Sala de jantar</span><i style="--w:92%" class="alto"></i><small>Impacto alto</small></div>
       <div class="am-linha"><span>Hall de entrada</span><i style="--w:70%" class="alto"></i><small>Impacto alto</small></div>
       <div class="am-linha"><span>Home office</span><i style="--w:42%" class="medio"></i><small>Impacto médio</small></div>
@@ -170,7 +160,7 @@ function capa(acao) {
       <p class="am-fim"><span>Comece pela</span> <b>sala de jantar</b></p>
     </div>
   </section>
-  <blockquote class="frase sangra"><p>Um bom projeto <strong>não começa escolhendo móveis.</strong> Começa entendendo como eles vão funcionar <span class="mao">juntos.</span></p></blockquote>
+  <blockquote class="bordo sangra frase"><p>Um bom projeto <strong>não começa escolhendo móveis.</strong> Começa entendendo como eles vão funcionar <span class="mao">juntos.</span></p></blockquote>
   <section class="quem">
     ${rot(0, 'Quem conduz')}
     ${ASSINATURA}
