@@ -6,7 +6,7 @@ O caminho do cliente:
 2. Recebe a senha e o link (automático ou enviado por você).
 3. Abre o aplicativo no celular, digita a senha e responde em cerca de 6 minutos.
 4. Vê na tela o estado geral da casa, os ambientes em ordem e o próximo passo.
-5. Você recebe tudo no **painel** (`/admin.html`): respostas, pontos, quadrantes e o caminho indicado (Premier, Essence, Maison…).
+5. Você recebe tudo no **painel** (`/admin.html`): respostas, pontos, quadrantes e o caminho indicado (Plano Express, Essence, Maison…).
 
 Leva uns 20 minutos, uma vez só. As contas são gratuitas e é o mesmo Supabase e Render do app da família.
 

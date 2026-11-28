@@ -79,10 +79,10 @@ function escolherCaminho(estadoId, ambientes, r) {
   if (estadoId === 'cuidado') {
     const ids = doQuadrante(1, 2);
     return {
-      linha: 'Premier',
+      linha: 'Plano Express',
       ambientes: ids,
-      frase: 'Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é a **Premier**, uma conversa de 1h30 para definir a estratégia da casa inteira: prioridades, ordem das compras e o que cada ambiente precisa.',
-      nota: '3 ou mais ambientes de impacto alto: Premier.',
+      frase: 'Com base no seu diagnóstico, o serviço que mais te atenderia neste momento é o **Plano Express**, uma conversa de 1h30 para definir a estratégia da casa inteira: prioridades, ordem das compras e o que cada ambiente precisa.',
+      nota: '3 ou mais ambientes de impacto alto: Plano Express.',
     };
   }
   if (estadoId === 'paz') {

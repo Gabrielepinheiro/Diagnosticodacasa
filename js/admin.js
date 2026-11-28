@@ -329,7 +329,7 @@ function htmlPublico() {
       ${blocoPublico('Onde salva referências', P.REFERENCIAS, rs.map((r) => r.referencias))}
       ${blocoPublico('Ambiente nº 1 do diagnóstico', P.AMBIENTES.map((a) => ({ id: a.id, t: a.nome })), primeiros)}
       ${blocoPublico('Leitura geral', ['Boa base', 'Pontos específicos', 'Pede uma visão do conjunto'].map((t) => ({ id: t, t })), res.map((x) => x.estado?.nome))}
-      ${blocoPublico('Caminho indicado', ['Premier', 'Essence', 'Maison', 'Personalité', 'Collection ou Essence'].map((t) => ({ id: t, t })), res.map((x) => x.caminho?.linha))}
+      ${blocoPublico('Caminho indicado', ['Plano Express', 'Essence', 'Maison', 'Personalité', 'Collection ou Essence'].map((t) => ({ id: t, t })), res.map((x) => (x.caminho?.linha === 'Premier' ? 'Plano Express' : x.caminho?.linha)))}
       ${blocoPublico('Quer receber proposta', P.PROPOSTA, rs.map((r) => r.proposta))}
       ${blocoPublico('Quando quer começar', P.INICIO, rs.map((r) => r.inicio))}
       ${blocoPublico('Imóvel', P.IMOVEL, rs.map((r) => r.imovel))}

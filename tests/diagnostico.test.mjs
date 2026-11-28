@@ -53,7 +53,7 @@ test('desempate: P11 primeiro, depois a frequência', () => {
   assert.deepEqual(res.ambientes.map((a) => a.id), ['jantar', 'estar', 'hall']);
 });
 
-test('3 ou mais ambientes de impacto alto: Pede cuidado e Premier', () => {
+test('3 ou mais ambientes de impacto alto: Pede cuidado e Plano Express', () => {
   const amb = ['estar', 'cozinha', 'casal'];
   const res = calcular(base({
     ambientes: amb,
@@ -61,7 +61,7 @@ test('3 ou mais ambientes de impacto alto: Pede cuidado e Premier', () => {
     prioridade: 'estar',
   }));
   assert.equal(res.estado.id, 'cuidado');
-  assert.equal(res.caminho.linha, 'Premier');
+  assert.equal(res.caminho.linha, 'Plano Express');
 });
 
 test('casa em paz: Collection ou Essence', () => {
